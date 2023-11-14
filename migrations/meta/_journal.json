@@ -1,0 +1,20 @@
+{
+  "version": "5",
+  "dialect": "pg",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1699951248606,
+      "tag": "0000_aberrant_expediter",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1699952270759,
+      "tag": "0001_outstanding_mister_sinister",
+      "breakpoints": true
+    }
+  ]
+}
