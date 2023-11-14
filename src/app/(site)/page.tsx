@@ -1,6 +1,7 @@
 import TitleSection from '@/components/landing-page/TitleSection'
 import Banner from '../../../public/appBanner.png'
 import Cal from '../../../public/cal.png'
+
 import { Button } from '@/components/ui/button'
 import { CLIENTS } from '@/lib/constants'
 
@@ -76,14 +77,25 @@ const Home = () => {
         </div>
       </section>
       <section className="px-4 sm:px-6 flex justify-center items-center flex-col relative">
-        <div className="w-[30%] blur-[120px] rounded-full h-32 absolute bg-brand-primaryPurple/50 -z-10 top-22" />
+        <div className="w-[30%] blur-[120px] rounded-full h-32 absolute bg-brand-primaryPurple/50 -z-10" />
         <TitleSection
           title="Keep track of your meetings all in one place"
           subheading="Capture your ideas, thoughts, and meeting notes in a structured and organized manner."
           pill="Features"
         />
-        <div className="mt-10 max-w-[450px] justify-center items-center relative sm:ml-0 rounded-2xl border-8 border-washed-purple-300 border-opacity-10">
+        <div className="mt-10 max-w-[450px] justify-center items-center relative sm:ml-0 rounded-2xl border-8 border-washed-purple-300 border-opacity-10 top-[22px]">
           <Image src={Cal} alt="Banner" className="rounded-2xl" />
+        </div>
+      </section>
+      <section className="relative">
+        <div className="w-full blur-[120px] rounded-full h-32 absolute bg-brand-primaryPurple/50 -z-10 top-[56px]" />
+        <div className="mt-20 px-4 sm:px-6 flex flex-col overflow-x-hidden overflow-visible">
+          <TitleSection
+            title="Trusted by all"
+            subheading="Join thousands of satisfied users who rely on our platform for their 
+            personal and professional productivity needs."
+            pill="Testimonials"
+          />
         </div>
       </section>
     </>
