@@ -1,8 +1,12 @@
 import TitleSection from '@/components/landing-page/TitleSection'
+import Banner from '../../../public/appBanner.png'
+import Cal from '../../../public/cal.png'
 import { Button } from '@/components/ui/button'
+import { CLIENTS } from '@/lib/constants'
+
 import Image from 'next/image'
 import React from 'react'
-import Banner from '../../../public/appBanner.png'
+
 const Home = () => {
   return (
     <>
@@ -51,7 +55,36 @@ const Home = () => {
           before:w-20
           before:z-10
           before:absolute'
-        ></div>
+        >
+          {[...Array(2)].map(() => (
+            <div key="sss" className="flex flex-nowrap animate-slide">
+              {CLIENTS.map((client) => (
+                <div
+                  key={client.alt}
+                  className="relative w-[200px] m-20 shrink-0 flex items-center"
+                >
+                  <Image
+                    src={client.logo}
+                    alt={client.alt}
+                    width={200}
+                    className="object-contain max-w-none"
+                  />
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      </section>
+      <section className="px-4 sm:px-6 flex justify-center items-center flex-col relative">
+        <div className="w-[30%] blur-[120px] rounded-full h-32 absolute bg-brand-primaryPurple/50 -z-10 top-22" />
+        <TitleSection
+          title="Keep track of your meetings all in one place"
+          subheading="Capture your ideas, thoughts, and meeting notes in a structured and organized manner."
+          pill="Features"
+        />
+        <div className="mt-10 max-w-[450px] justify-center items-center relative sm:ml-0 rounded-2xl border-8 border-washed-purple-300 border-opacity-10">
+          <Image src={Cal} alt="Banner" className="rounded-2xl" />
+        </div>
       </section>
     </>
   )
