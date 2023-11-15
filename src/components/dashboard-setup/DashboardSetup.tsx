@@ -29,7 +29,11 @@ const DashboardSetup: React.FC<DashboardSetupProps> = ({
       </CardHeader>
       <CardContent>
         <form onSubmit={() => {}}>
-          <div className="flex flex-col gap-4"></div>
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-4">
+              <div className="text-5xl"></div>
+            </div>
+          </div>
         </form>
       </CardContent>
     </Card>
