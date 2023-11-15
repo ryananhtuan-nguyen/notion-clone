@@ -23,6 +23,7 @@ import Loader from '@/components/Loader'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { MailCheck } from 'lucide-react'
 import { FormSchema } from '@/lib/types'
+import { actionSignUpUser } from '@/lib/server-action/auth-actions'
 
 const signUpFormSchema = z
   .object({
@@ -69,9 +70,16 @@ const SignUp = () => {
   })
 
   const isLoading = form.formState.isSubmitting
-  const onSubmit = async ({ email, password }: z.infer<typeof FormSchema>) => {}
+  const onSubmit = async ({ email, password }: z.infer<typeof FormSchema>) => {
+    const { error } = await actionSignUpUser({ email, password })
+    if (error) {
+      setSubmitError(error.message)
+      form.reset()
+      return
+    }
 
-  const signUpHandler = () => {}
+    setConfirmation(true)
+  }
 
   return (
     <Form {...form}>
@@ -80,7 +88,7 @@ const SignUp = () => {
           if (submitError) setSubmitError('')
         }}
         onSubmit={form.handleSubmit(onSubmit)}
-        className="w-full sm:justify-center sm-w-[400px] space-y-6 flex flex-col"
+        className="w-full sm:justify-center sm:w-[400px] space-y-6 flex flex-col"
       >
         <Link
           href="/"
