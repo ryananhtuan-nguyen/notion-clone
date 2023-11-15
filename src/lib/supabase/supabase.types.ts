@@ -1,3 +1,15 @@
+import { InferSelectModel } from 'drizzle-orm'
+import {
+  customers,
+  files,
+  folders,
+  prices,
+  products,
+  subscriptions,
+  users,
+  workspaces,
+} from '../../../migrations/schema'
+
 export type Json =
   | string
   | number
@@ -24,11 +36,11 @@ export interface Database {
         }
         Relationships: [
           {
-            foreignKeyName: "customers_id_fkey"
-            columns: ["id"]
+            foreignKeyName: 'customers_id_fkey'
+            columns: ['id']
             isOneToOne: true
-            referencedRelation: "users"
-            referencedColumns: ["id"]
+            referencedRelation: 'users'
+            referencedColumns: ['id']
           }
         ]
       }
@@ -74,18 +86,18 @@ export interface Database {
         }
         Relationships: [
           {
-            foreignKeyName: "files_folder_id_folders_id_fk"
-            columns: ["folder_id"]
+            foreignKeyName: 'files_folder_id_folders_id_fk'
+            columns: ['folder_id']
             isOneToOne: false
-            referencedRelation: "folders"
-            referencedColumns: ["id"]
+            referencedRelation: 'folders'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "files_workspace_id_workspaces_id_fk"
-            columns: ["workspace_id"]
+            foreignKeyName: 'files_workspace_id_workspaces_id_fk'
+            columns: ['workspace_id']
             isOneToOne: false
-            referencedRelation: "workspaces"
-            referencedColumns: ["id"]
+            referencedRelation: 'workspaces'
+            referencedColumns: ['id']
           }
         ]
       }
@@ -128,11 +140,11 @@ export interface Database {
         }
         Relationships: [
           {
-            foreignKeyName: "folders_workspace_id_workspaces_id_fk"
-            columns: ["workspace_id"]
+            foreignKeyName: 'folders_workspace_id_workspaces_id_fk'
+            columns: ['workspace_id']
             isOneToOne: false
-            referencedRelation: "workspaces"
-            referencedColumns: ["id"]
+            referencedRelation: 'workspaces'
+            referencedColumns: ['id']
           }
         ]
       }
@@ -142,12 +154,12 @@ export interface Database {
           currency: string | null
           description: string | null
           id: string
-          interval: Database["public"]["Enums"]["pricing_plan_interval"] | null
+          interval: Database['public']['Enums']['pricing_plan_interval'] | null
           interval_count: number | null
           metadata: Json | null
           product_id: string | null
           trial_period_days: number | null
-          type: Database["public"]["Enums"]["pricing_type"] | null
+          type: Database['public']['Enums']['pricing_type'] | null
           unit_amount: number | null
         }
         Insert: {
@@ -155,12 +167,12 @@ export interface Database {
           currency?: string | null
           description?: string | null
           id: string
-          interval?: Database["public"]["Enums"]["pricing_plan_interval"] | null
+          interval?: Database['public']['Enums']['pricing_plan_interval'] | null
           interval_count?: number | null
           metadata?: Json | null
           product_id?: string | null
           trial_period_days?: number | null
-          type?: Database["public"]["Enums"]["pricing_type"] | null
+          type?: Database['public']['Enums']['pricing_type'] | null
           unit_amount?: number | null
         }
         Update: {
@@ -168,21 +180,21 @@ export interface Database {
           currency?: string | null
           description?: string | null
           id?: string
-          interval?: Database["public"]["Enums"]["pricing_plan_interval"] | null
+          interval?: Database['public']['Enums']['pricing_plan_interval'] | null
           interval_count?: number | null
           metadata?: Json | null
           product_id?: string | null
           trial_period_days?: number | null
-          type?: Database["public"]["Enums"]["pricing_type"] | null
+          type?: Database['public']['Enums']['pricing_type'] | null
           unit_amount?: number | null
         }
         Relationships: [
           {
-            foreignKeyName: "prices_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'prices_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
+            referencedRelation: 'products'
+            referencedColumns: ['id']
           }
         ]
       }
@@ -226,7 +238,7 @@ export interface Database {
           metadata: Json | null
           price_id: string | null
           quantity: number | null
-          status: Database["public"]["Enums"]["subscription_status"] | null
+          status: Database['public']['Enums']['subscription_status'] | null
           trial_end: string | null
           trial_start: string | null
           user_id: string
@@ -243,7 +255,7 @@ export interface Database {
           metadata?: Json | null
           price_id?: string | null
           quantity?: number | null
-          status?: Database["public"]["Enums"]["subscription_status"] | null
+          status?: Database['public']['Enums']['subscription_status'] | null
           trial_end?: string | null
           trial_start?: string | null
           user_id: string
@@ -260,32 +272,32 @@ export interface Database {
           metadata?: Json | null
           price_id?: string | null
           quantity?: number | null
-          status?: Database["public"]["Enums"]["subscription_status"] | null
+          status?: Database['public']['Enums']['subscription_status'] | null
           trial_end?: string | null
           trial_start?: string | null
           user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "subscriptions_price_id_fkey"
-            columns: ["price_id"]
+            foreignKeyName: 'subscriptions_price_id_fkey'
+            columns: ['price_id']
             isOneToOne: false
-            referencedRelation: "prices"
-            referencedColumns: ["id"]
+            referencedRelation: 'prices'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "subscriptions_price_id_prices_id_fk"
-            columns: ["price_id"]
+            foreignKeyName: 'subscriptions_price_id_prices_id_fk'
+            columns: ['price_id']
             isOneToOne: false
-            referencedRelation: "prices"
-            referencedColumns: ["id"]
+            referencedRelation: 'prices'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "subscriptions_user_id_fkey"
-            columns: ["user_id"]
+            foreignKeyName: 'subscriptions_user_id_fkey'
+            columns: ['user_id']
             isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
+            referencedRelation: 'users'
+            referencedColumns: ['id']
           }
         ]
       }
@@ -319,11 +331,11 @@ export interface Database {
         }
         Relationships: [
           {
-            foreignKeyName: "users_id_fkey"
-            columns: ["id"]
+            foreignKeyName: 'users_id_fkey'
+            columns: ['id']
             isOneToOne: true
-            referencedRelation: "users"
-            referencedColumns: ["id"]
+            referencedRelation: 'users'
+            referencedColumns: ['id']
           }
         ]
       }
@@ -371,16 +383,16 @@ export interface Database {
       [_ in never]: never
     }
     Enums: {
-      pricing_plan_interval: "day" | "week" | "month" | "year"
-      pricing_type: "one_time" | "recurring"
+      pricing_plan_interval: 'day' | 'week' | 'month' | 'year'
+      pricing_type: 'one_time' | 'recurring'
       subscription_status:
-        | "trialing"
-        | "active"
-        | "canceled"
-        | "incomplete"
-        | "incomplete_expired"
-        | "past_due"
-        | "unpaid"
+        | 'trialing'
+        | 'active'
+        | 'canceled'
+        | 'incomplete'
+        | 'incomplete_expired'
+        | 'past_due'
+        | 'unpaid'
     }
     CompositeTypes: {
       [_ in never]: never
@@ -490,11 +502,11 @@ export interface Database {
         }
         Relationships: [
           {
-            foreignKeyName: "objects_bucketId_fkey"
-            columns: ["bucket_id"]
+            foreignKeyName: 'objects_bucketId_fkey'
+            columns: ['bucket_id']
             isOneToOne: false
-            referencedRelation: "buckets"
-            referencedColumns: ["id"]
+            referencedRelation: 'buckets'
+            referencedColumns: ['id']
           }
         ]
       }
@@ -566,3 +578,16 @@ export interface Database {
     }
   }
 }
+
+export type workspace = InferSelectModel<typeof workspaces>
+export type User = InferSelectModel<typeof users>
+export type Folder = InferSelectModel<typeof folders>
+export type File = InferSelectModel<typeof files>
+export type Product = InferSelectModel<typeof products>
+export type Price = InferSelectModel<typeof prices> & { products?: Product }
+export type Customer = InferSelectModel<typeof customers>
+export type Subscription = InferSelectModel<typeof subscriptions> & {
+  prices: Price
+}
+
+export type ProductWithPrice = Product & { prices?: Price }
