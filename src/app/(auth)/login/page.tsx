@@ -40,8 +40,9 @@ const LoginPage = () => {
     if (error) {
       form.reset()
       setSubmitError(error.message)
+    } else {
+      router.replace('/dashboard')
     }
-    router.replace('/dashboard')
   }
 
   return (
