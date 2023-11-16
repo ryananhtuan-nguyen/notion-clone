@@ -11,7 +11,7 @@ import {
   integer,
 } from 'drizzle-orm/pg-core'
 
-import { sql } from 'drizzle-orm'
+import { relations, sql } from 'drizzle-orm'
 export const keyStatus = pgEnum('key_status', [
   'expired',
   'invalid',
@@ -31,8 +31,8 @@ export const keyType = pgEnum('key_type', [
   'aead-det',
   'aead-ietf',
 ])
-export const factorType = pgEnum('factor_type', ['webauthn', 'totp'])
 export const factorStatus = pgEnum('factor_status', ['verified', 'unverified'])
+export const factorType = pgEnum('factor_type', ['webauthn', 'totp'])
 export const aalLevel = pgEnum('aal_level', ['aal3', 'aal2', 'aal1'])
 export const codeChallengeMethod = pgEnum('code_challenge_method', [
   'plain',
@@ -54,10 +54,28 @@ export const subscriptionStatus = pgEnum('subscription_status', [
   'active',
   'trialing',
 ])
+export const equalityOp = pgEnum('equality_op', [
+  'in',
+  'gte',
+  'gt',
+  'lte',
+  'lt',
+  'neq',
+  'eq',
+])
+export const action = pgEnum('action', [
+  'ERROR',
+  'TRUNCATE',
+  'DELETE',
+  'UPDATE',
+  'INSERT',
+])
 
 export const workspaces = pgTable('workspaces', {
   id: uuid('id').defaultRandom().primaryKey().notNull(),
-  createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
+    .defaultNow()
+    .notNull(),
   workspaceOwner: uuid('workspace_owner').notNull(),
   title: text('title').notNull(),
   iconId: text('icon_id').notNull(),
@@ -69,35 +87,35 @@ export const workspaces = pgTable('workspaces', {
 
 export const folders = pgTable('folders', {
   id: uuid('id').defaultRandom().primaryKey().notNull(),
-  createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }),
-  workspaceOwner: uuid('workspace_owner').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
+    .defaultNow()
+    .notNull(),
   title: text('title').notNull(),
   iconId: text('icon_id').notNull(),
   data: text('data'),
   inTrash: text('in_trash'),
-  logo: text('logo'),
   bannerUrl: text('banner_url'),
-  workspaceId: uuid('workspace_id').references(() => workspaces.id, {
-    onDelete: 'cascade',
-  }),
+  workspaceId: uuid('workspace_id')
+    .notNull()
+    .references(() => workspaces.id, { onDelete: 'cascade' }),
 })
 
 export const files = pgTable('files', {
   id: uuid('id').defaultRandom().primaryKey().notNull(),
-  createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }),
-  workspaceOwner: uuid('workspace_owner').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
+    .defaultNow()
+    .notNull(),
   title: text('title').notNull(),
   iconId: text('icon_id').notNull(),
   data: text('data'),
   inTrash: text('in_trash'),
-  logo: text('logo'),
   bannerUrl: text('banner_url'),
-  workspaceId: uuid('workspace_id').references(() => workspaces.id, {
-    onDelete: 'cascade',
-  }),
-  folderId: uuid('folder_id').references(() => folders.id, {
-    onDelete: 'cascade',
-  }),
+  workspaceId: uuid('workspace_id')
+    .notNull()
+    .references(() => workspaces.id, { onDelete: 'cascade' }),
+  folderId: uuid('folder_id')
+    .notNull()
+    .references(() => folders.id, { onDelete: 'cascade' }),
 })
 
 export const users = pgTable('users', {
@@ -183,3 +201,27 @@ export const subscriptions = pgTable('subscriptions', {
     mode: 'string',
   }).default(sql`now()`),
 })
+
+export const collaborators = pgTable('collaborators', {
+  workspaceId: uuid('workspace_id')
+    .notNull()
+    .references(() => workspaces.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
+    .defaultNow()
+    .notNull(),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  id: uuid('id').defaultRandom().primaryKey().notNull(),
+})
+
+export const productsRelations = relations(products, ({ many }) => ({
+  prices: many(prices),
+}))
+
+export const pricesRelations = relations(prices, ({ one }) => ({
+  product: one(products, {
+    fields: [prices.productId],
+    references: [products.id],
+  }),
+}))
