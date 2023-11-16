@@ -4,6 +4,7 @@ import { DM_Sans } from 'next/font/google'
 
 import './globals.css'
 import { cn } from '@/lib/utils'
+import AppStateProvider from '@/lib/providers/state-provider'
 
 const inter = DM_Sans({ subsets: ['latin'] })
 
@@ -21,7 +22,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={cn('bg-background', inter.className)}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-          {children}
+          <AppStateProvider>{children}</AppStateProvider>
         </ThemeProvider>
       </body>
     </html>
