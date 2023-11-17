@@ -11,6 +11,7 @@ import {
 } from '@/lib/supabase/queries'
 import { cn } from '@/lib/utils'
 import WorkspaceDropdown from './WorkspaceDropdown'
+import PlanUsage from './PlanUsage'
 
 interface SidebarProps {
   params: { workspaceId: string }
@@ -65,6 +66,10 @@ const Sidebar: React.FC<SidebarProps> = async ({ params, className }) => {
             ...sharedWorkspaces,
             ...collaboratingWorkspaces,
           ].find((workspace) => workspace.id === params.workspaceId)}
+        />
+        <PlanUsage
+          foldersLength={workspaceFolderData?.length || 0}
+          subscription={subscription}
         />
       </div>
     </aside>
