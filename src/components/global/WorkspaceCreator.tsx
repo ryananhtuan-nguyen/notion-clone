@@ -21,13 +21,16 @@ import { addCollaborators, createWorkspace } from '@/lib/supabase/queries'
 import CollaboratorSearch from './CollaboratorSearch'
 import { ScrollArea } from '../ui/scroll-area'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
+import { useToast } from '../ui/use-toast'
 
 const WorkspaceCreator = () => {
-  const { user } = useSupabaseUser()
   const router = useRouter()
+  const { toast } = useToast()
+  const { user } = useSupabaseUser()
   const [permissions, setPermissions] = useState('private')
   const [title, setTitle] = useState('')
   const [collaborators, setCollaborators] = useState<User[]>([])
+  const [isLoading, setIsLoading] = useState(false)
 
   const addCollaborator = (user: User) => {
     setCollaborators([...collaborators, user])
@@ -38,6 +41,7 @@ const WorkspaceCreator = () => {
   }
 
   const createItem = async () => {
+    setIsLoading(true)
     const uuid = v4()
     if (user?.id) {
       const newWorkspace: workspace = {
@@ -53,14 +57,23 @@ const WorkspaceCreator = () => {
       }
       if (permissions === 'private') {
         await createWorkspace(newWorkspace)
+        toast({
+          title: 'Success',
+          description: 'Created the workspace',
+        })
         router.refresh()
       }
       if (permissions === 'shared') {
         await createWorkspace(newWorkspace)
         await addCollaborators(collaborators, uuid)
+        toast({
+          title: 'Success',
+          description: 'Created the workspace',
+        })
         router.refresh()
       }
     }
+    setIsLoading(false)
   }
 
   return (
@@ -177,7 +190,9 @@ const WorkspaceCreator = () => {
       <Button
         type="button"
         disabled={
-          !title || (permissions === 'shared' && collaborators.length === 0)
+          !title ||
+          (permissions === 'shared' && collaborators.length === 0) ||
+          isLoading
         }
         variant={'secondary'}
         onClick={createItem}
