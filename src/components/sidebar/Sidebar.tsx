@@ -12,6 +12,7 @@ import {
 import { cn } from '@/lib/utils'
 import WorkspaceDropdown from './WorkspaceDropdown'
 import PlanUsage from './PlanUsage'
+import NativeNavigation from './NativeNavigation'
 
 interface SidebarProps {
   params: { workspaceId: string }
@@ -71,6 +72,7 @@ const Sidebar: React.FC<SidebarProps> = async ({ params, className }) => {
           foldersLength={workspaceFolderData?.length || 0}
           subscription={subscription}
         />
+        <NativeNavigation myWorkspaceId={params.workspaceId} />
       </div>
     </aside>
   )
