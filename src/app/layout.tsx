@@ -5,6 +5,7 @@ import { DM_Sans } from 'next/font/google'
 import './globals.css'
 import { cn } from '@/lib/utils'
 import AppStateProvider from '@/lib/providers/state-provider'
+import { SupabaseUserProvider } from '@/lib/providers/supabase-user-provider'
 
 const inter = DM_Sans({ subsets: ['latin'] })
 
@@ -22,7 +23,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={cn('bg-background', inter.className)}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-          <AppStateProvider>{children}</AppStateProvider>
+          <AppStateProvider>
+            <SupabaseUserProvider>{children}</SupabaseUserProvider>
+          </AppStateProvider>
         </ThemeProvider>
       </body>
     </html>
