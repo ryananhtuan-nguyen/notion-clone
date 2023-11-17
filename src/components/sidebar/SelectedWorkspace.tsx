@@ -1,11 +1,9 @@
 'use client'
-
-import React, { useEffect, useState } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-
 import { workspace } from '@/lib/supabase/supabase.types'
-import Link from 'next/link'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import Image from 'next/image'
+import Link from 'next/link'
+import React, { useEffect, useState } from 'react'
 
 interface SelectedWorkspaceProps {
   workspace: workspace
@@ -18,7 +16,6 @@ const SelectedWorkspace: React.FC<SelectedWorkspaceProps> = ({
 }) => {
   const supabase = createClientComponentClient()
   const [workspaceLogo, setWorkspaceLogo] = useState('/cypresslogo.svg')
-
   useEffect(() => {
     if (workspace.logo) {
       const path = supabase.storage
@@ -27,16 +24,23 @@ const SelectedWorkspace: React.FC<SelectedWorkspaceProps> = ({
       setWorkspaceLogo(path)
     }
   }, [workspace])
-
   return (
     <Link
       href={`/dashboard/${workspace.id}`}
       onClick={() => {
-        if (onClick) {
-          onClick(workspace)
-        }
+        if (onClick) onClick(workspace)
       }}
-      className="flex rounded-md hover:bg-muted transition-all flex-row p-2 gap-4 justify-center cursor-pointer items-center my2"
+      className="flex 
+      rounded-md 
+      hover:bg-muted 
+      transition-all 
+      flex-row 
+      p-2 
+      gap-4 
+      justify-center 
+      cursor-pointer 
+      items-center 
+      my-2"
     >
       <Image
         src={workspaceLogo}
@@ -46,7 +50,13 @@ const SelectedWorkspace: React.FC<SelectedWorkspaceProps> = ({
         objectFit="cover"
       />
       <div className="flex flex-col">
-        <p className="text-lg overflow-hidden overflow-ellipsis whitespace-nowrap">
+        <p
+          className="text-lg 
+        w-[170px] 
+        overflow-hidden 
+        overflow-ellipsis 
+        whitespace-nowrap"
+        >
           {workspace.title}
         </p>
       </div>
