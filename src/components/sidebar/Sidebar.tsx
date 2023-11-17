@@ -1,3 +1,7 @@
+import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
+
 import {
   getCollaboratingWorkspaces,
   getFolders,
@@ -5,9 +9,8 @@ import {
   getSharedWorkspaces,
   getUserSubscriptionStatus,
 } from '@/lib/supabase/queries'
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
+import { cn } from '@/lib/utils'
+import WorkspaceDropdown from './WorkspaceDropdown'
 
 interface SidebarProps {
   params: { workspaceId: string }
@@ -45,7 +48,26 @@ const Sidebar: React.FC<SidebarProps> = async ({ params, className }) => {
     ])
 
   return (
-    <aside className="hidden sm:flex sm:flex-col w-[280px] shrink-0 p-4 md:gap-4 !justify-between"></aside>
+    <aside
+      className={cn(
+        'hidden sm:flex sm:flex-col w-[280px] shrink-0 p-4 md:gap-4 !justify-between',
+        className
+      )}
+    >
+      {/* Workspace dropdown */}
+      <div>
+        <WorkspaceDropdown
+          privateWorkspaces={privateWorkspaces}
+          sharedWorkspaces={sharedWorkspaces}
+          collaboratingWorkspaces={collaboratingWorkspaces}
+          defaultValue={[
+            ...privateWorkspaces,
+            ...sharedWorkspaces,
+            ...collaboratingWorkspaces,
+          ].find((workspace) => workspace.id === params.workspaceId)}
+        />
+      </div>
+    </aside>
   )
 }
 
