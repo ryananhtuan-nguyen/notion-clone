@@ -8,9 +8,9 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = async ({ children, params }) => {
   const { data: products, error } = await getActiveProductsWithPrice()
-  if (error) {
-    throw new Error()
-  }
+  // if (error) {
+  //   throw new Error()
+  // }
 
   return (
     <main className="flex overflow-hidden h-screen">
