@@ -72,7 +72,11 @@ const Dropdown: React.FC<DropdownProps> = ({
       router.push(`/dashboard/${workspaceId}/${accordionId}`)
     }
     if (type === 'file') {
-      router.push(`/dashboard/${workspaceId}/${folderId}/${accordionId}`)
+      router.push(
+        `/dashboard/${workspaceId}/${folderId}/${
+          accordionId.split('folder')[1]
+        }`
+      )
     }
   }
   // Add a file
@@ -138,11 +142,6 @@ const Dropdown: React.FC<DropdownProps> = ({
           variant: 'destructive',
           description: 'Failed changing folder title',
         })
-      } else {
-        toast({
-          title: 'Success',
-          description: 'Folder title changed.',
-        })
       }
     }
     if (fId.length === 2 && fId[1]) {
@@ -159,11 +158,6 @@ const Dropdown: React.FC<DropdownProps> = ({
           title: 'Error',
           variant: 'destructive',
           description: 'Failed changing file title',
-        })
-      } else {
-        toast({
-          title: 'Success',
-          description: 'File title changed.',
         })
       }
     }
