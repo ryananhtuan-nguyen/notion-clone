@@ -1,11 +1,14 @@
 'use client'
+import Link from 'next/link'
+import { v4 } from 'uuid'
 import React, { useEffect, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+
 import { useToast } from '../ui/use-toast'
 import { useAppState } from '@/lib/providers/state-provider'
 import { User, workspace } from '@/lib/supabase/supabase.types'
 import { useSupabaseUser } from '@/lib/providers/supabase-user-provider'
-import { useRouter } from 'next/navigation'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import {
   Briefcase,
   CreditCard,
@@ -26,7 +29,6 @@ import {
   removeCollaborators,
   updateWorkspace,
 } from '@/lib/supabase/queries'
-import { v4 } from 'uuid'
 import {
   Select,
   SelectContent,
@@ -53,7 +55,6 @@ import { ScrollArea } from '../ui/scroll-area'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import { Alert, AlertDescription } from '../ui/alert'
 import CypressProfileIcon from '../icons/cypressProfileIcon'
-import Link from 'next/link'
 import { postData } from '@/lib/utils'
 
 const SettingForm = () => {
@@ -73,8 +74,30 @@ const SettingForm = () => {
   //WIP Payment Portal
 
   //add collaborator
+  const addCollaborator = async (profile: User) => {
+    if (!workspaceId) return
+    //WIP Subscription
+    //if(subscription?.status !== 'active' && collaborators.length>=2){
+    //setOpen(true)
+    //return
+    //}
+    await addCollaborators(collaborators, workspaceId)
+    setCollaborators([...collaborators, profile])
+    router.refresh()
+  }
 
   //remove collaborator
+  const removeCollaborator = async (user: User) => {
+    if (!workspaceId) return
+    if (collaborators.length === 1) {
+      setPermissions('Private')
+    }
+    await removeCollaborators([user], workspaceId)
+    setCollaborators(
+      collaborators.filter((collaborator) => collaborator.id !== user.id)
+    )
+    router.refresh()
+  }
 
   //onChange workspace title
 
@@ -127,6 +150,13 @@ const SettingForm = () => {
     }
   }
 
+  //----------------------CHANGE PERMISSONS------------------------
+  const onPermissionsChange = (val: string) => {
+    if (val === 'private') {
+      setOpenAlertMessage(true)
+    } else setPermissions(val)
+  }
+
   //onClick alert
 
   //fetching details (avatar, workspacedetails)
@@ -134,6 +164,13 @@ const SettingForm = () => {
   //get all collaborators
 
   //WIP PAYMENT PORTAL redirect
+
+  useEffect(() => {
+    const showingWorkspace = state.workspaces.find(
+      (workspace) => workspace.id === workspaceId
+    )
+    if (showingWorkspace) setWorkspaceDetails(showingWorkspace)
+  }, [workspaceId, state])
 
   return (
     <div className="flex gap4 flex-col">
@@ -317,7 +354,7 @@ const SettingForm = () => {
             Delete Workspace
           </Button>
         </Alert>
-        <p className="flex items-center gap-2 mt-6">
+        {/* <p className="flex items-center gap-2 mt-6">
           <UserIcon size={20} /> Profile
         </p>
         <Separator />
@@ -393,7 +430,7 @@ const SettingForm = () => {
               Start Plan
             </Button>
           </div>
-        )}
+        )} */}
       </>
     </div>
   )
