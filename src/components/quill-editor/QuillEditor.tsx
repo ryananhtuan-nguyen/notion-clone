@@ -13,6 +13,14 @@ import {
   updateFolder,
 } from '@/lib/supabase/queries'
 import { usePathname } from 'next/navigation'
+import { string } from 'zod'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '../ui/tooltip'
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 
 interface QuillEditorProps {
   dirDetails: File | Folder | workspace
@@ -48,6 +56,9 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
   const { state, workspaceId, folderId, dispatch } = useAppState()
   const [quill, setQuill] = useState<any>(null)
   const pathname = usePathname()
+  const [collaborators, setCollaborators] =
+    useState<{ id: string; email: string; avatarUrl: string }[]>()
+  const [saving, setSaving] = useState(false)
 
   //--------------------DETAILS DISPLAYING------------------------
   const details = useMemo(() => {
@@ -241,7 +252,25 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
           <div>{breadCrumbs}</div>
           <div className="flex items-center gap-4">
             <div className="flex items-center justify-center h-10">
-              {/* WIP */}
+              {/* WIP mapping collaborator*/}
+              {collaborators?.map((collaborator) => (
+                <TooltipProvider key={collaborator.id}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Avatar className="-ml-3 bg-background border-2 flex items-center justify-center border-white h-8 w-8 rounded-full">
+                        <AvatarImage
+                          className="rounded-full"
+                          src={collaborator.avatarUrl || ''}
+                        />
+                        <AvatarFallback>
+                          {collaborator.email.substring(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                    </TooltipTrigger>
+                    <TooltipContent>User name</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              ))}
             </div>
           </div>
         </div>
