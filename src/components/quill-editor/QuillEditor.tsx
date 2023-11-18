@@ -134,17 +134,17 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
     }
   }
 
-  const handleDeleteFile = async () => {
+  const deleteFileHandler = async () => {
     if (dirType === 'file') {
       if (!folderId || !workspaceId || !fileId) return
       dispatch({
         type: 'DELETE_FILE',
-        payload: { workspaceId, folderId: fileId, fileId },
+        payload: { workspaceId, folderId, fileId },
       })
       await deleteFile(fileId)
     }
     if (dirType === 'folder') {
-      if (!workspaceId || !fileId) return
+      if (!workspaceId || !folderId) return
       dispatch({
         type: 'DELETE_FOLDER',
         payload: {
@@ -177,7 +177,7 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
                 size="sm"
                 variant="outline"
                 className="bg-transparent border-white text-white hover:bg-white hover:text-[#EB5757]"
-                onClick={handleDeleteFile}
+                onClick={deleteFileHandler}
               >
                 Delete
               </Button>
