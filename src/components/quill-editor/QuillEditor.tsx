@@ -109,30 +109,30 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
     }
   }, [])
 
-  // const restoreFileHandler = async () => {
-  //   if (dirType === 'file') {
-  //     if (!folderId || !workspaceId) return
-  //     dispatch({
-  //       type: 'UPDATE_FILE',
-  //       payload: { file: { inTrash: '' }, fileId, folderId, workspaceId },
-  //     })
-  //     await updateFile({ inTrash: '' }, fileId)
-  //   }
-  //   if (dirType === 'folder') {
-  //     if (!workspaceId) return
-  //     dispatch({
-  //       type: 'UPDATE_FOLDER',
-  //       payload: {
-  //         folder: {
-  //           inTrash: '',
-  //         },
-  //         folderId: fileId,
-  //         workspaceId,
-  //       },
-  //     })
-  //     await updateFolder({ inTrash: '' }, fileId)
-  //   }
-  // }
+  const restoreFileHandler = async () => {
+    if (dirType === 'file') {
+      if (!folderId || !workspaceId) return
+      dispatch({
+        type: 'UPDATE_FILE',
+        payload: { file: { inTrash: '' }, fileId, folderId, workspaceId },
+      })
+      await updateFile({ inTrash: '' }, fileId)
+    }
+    if (dirType === 'folder') {
+      if (!workspaceId) return
+      dispatch({
+        type: 'UPDATE_FOLDER',
+        payload: {
+          folder: {
+            inTrash: '',
+          },
+          folderId: fileId,
+          workspaceId,
+        },
+      })
+      await updateFolder({ inTrash: '' }, fileId)
+    }
+  }
 
   // const handleDeleteFile = async () => {
   //   if (dirType === 'file') {
