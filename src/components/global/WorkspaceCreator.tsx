@@ -152,7 +152,7 @@ const WorkspaceCreator = () => {
             <span className="text-sm text-muted-foreground">
               Collaborrators {collaborators.length || ''}
             </span>
-            <ScrollArea className="h-[120px] w-full rounded-md border border-muted-foreground/20">
+            <ScrollArea className="h-[120px] overflow-y-scroll w-full rounded-md border border-muted-foreground/20">
               {collaborators.length ? (
                 collaborators.map((c) => (
                   <div
