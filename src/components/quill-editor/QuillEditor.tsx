@@ -134,27 +134,27 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
     }
   }
 
-  // const handleDeleteFile = async () => {
-  //   if (dirType === 'file') {
-  //     if (!folderId || !workspaceId || !fileId) return
-  //     dispatch({
-  //       type: 'DELETE_FILE',
-  //       payload: { workspaceId, folderId: fileId, fileId },
-  //     })
-  //     await deleteFile(fileId)
-  //   }
-  //   if (dirType === 'folder') {
-  //     if (!workspaceId || !fileId) return
-  //     dispatch({
-  //       type: 'DELETE_FOLDER',
-  //       payload: {
-  //         folderId: fileId,
-  //         workspaceId,
-  //       },
-  //     })
-  //     await deleteFolder(fileId)
-  //   }
-  // }
+  const handleDeleteFile = async () => {
+    if (dirType === 'file') {
+      if (!folderId || !workspaceId || !fileId) return
+      dispatch({
+        type: 'DELETE_FILE',
+        payload: { workspaceId, folderId: fileId, fileId },
+      })
+      await deleteFile(fileId)
+    }
+    if (dirType === 'folder') {
+      if (!workspaceId || !fileId) return
+      dispatch({
+        type: 'DELETE_FOLDER',
+        payload: {
+          folderId: fileId,
+          workspaceId,
+        },
+      })
+      await deleteFolder(fileId)
+    }
+  }
 
   return (
     <>
