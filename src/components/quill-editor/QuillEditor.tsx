@@ -12,6 +12,7 @@ import {
   updateFile,
   updateFolder,
 } from '@/lib/supabase/queries'
+import { usePathname } from 'next/navigation'
 
 interface QuillEditorProps {
   dirDetails: File | Folder | workspace
@@ -46,7 +47,9 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
 }) => {
   const { state, workspaceId, folderId, dispatch } = useAppState()
   const [quill, setQuill] = useState<any>(null)
+  const pathname = usePathname()
 
+  //--------------------DETAILS DISPLAYING------------------------
   const details = useMemo(() => {
     let selectedDir
     switch (dirType) {
@@ -109,6 +112,54 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
     }
   }, [])
 
+  //-----------------------BREADCRUMBS TO SHOW LOCATION----------------------------
+
+  const breadCrumbs = useMemo(() => {
+    if (!pathname || !state.workspaces || !workspaceId) return
+    //get segments from path name
+    const segments = pathname
+      .split('/')
+      .filter((val) => val !== 'dashboard' && val)
+    const workspaceDetails = state.workspaces.find(
+      (workspace) => workspace.id === workspaceId
+    )
+
+    const workspaceBreadCrumb = workspaceDetails
+      ? `${workspaceDetails.iconId} ${workspaceDetails.title}`
+      : ''
+    //if segments.length =1 means we are in workspace, just return workspace details
+    if (segments.length === 1) {
+      return workspaceBreadCrumb
+    }
+    //else:
+    const folderSegment = segments[1]
+    const folderDetails = workspaceDetails?.folders.find(
+      (folder) => folder.id === folderSegment
+    )
+    const folderBreadCrumb = folderDetails
+      ? `/${folderDetails.iconId} ${folderDetails.title}`
+      : ''
+
+    //if segments.length == 2, means we are in folder, get workspace + folder
+    if (segments.length === 2) {
+      return `${workspaceBreadCrumb} ${folderBreadCrumb}`
+    }
+
+    //else, means we are in specific file
+    //get workspace, folder details and file details to return
+
+    const fileSegment = segments[2]
+    const fileDetails = folderDetails?.files.find(
+      (file) => file.id === fileSegment
+    )
+    const fileBreadCrumb = fileDetails
+      ? `/ ${fileDetails.iconId} ${fileDetails.title}`
+      : ''
+
+    return `${workspaceBreadCrumb} ${folderBreadCrumb} ${fileBreadCrumb}`
+  }, [state])
+
+  //--------------------------------RESTORING FILE IN TRASH--------------------------------
   const restoreFileHandler = async () => {
     if (dirType === 'file') {
       if (!folderId || !workspaceId) return
@@ -134,6 +185,7 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
     }
   }
 
+  //---------------------------MOVE FILE TO TRASH-------------------------------
   const deleteFileHandler = async () => {
     if (dirType === 'file') {
       if (!folderId || !workspaceId || !fileId) return
@@ -182,8 +234,17 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
                 Delete
               </Button>
             </div>
+            <span className="text-sm text-white">{details.inTrash}</span>
           </article>
         )}
+        <div className="flex flex-col-reverse sm:flex-row sm:justify-between justify-center sm:items-center sm:p-2 p-8">
+          <div>{breadCrumbs}</div>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center justify-center h-10">
+              {/* WIP */}
+            </div>
+          </div>
+        </div>
       </div>
       <div className="flex justify-center items-center flex-col mt-2 relative">
         <div id="container" ref={wrapperRef} className="max-w-[800px]"></div>
