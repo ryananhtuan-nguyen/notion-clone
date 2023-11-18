@@ -14,6 +14,7 @@ import { PlusIcon, Trash } from 'lucide-react'
 import { v4 } from 'uuid'
 import { File } from '@/lib/supabase/supabase.types'
 import { AccordionContent } from '@radix-ui/react-accordion'
+import { useSupabaseUser } from '@/lib/providers/supabase-user-provider'
 
 interface DropdownProps {
   title: string
@@ -34,6 +35,7 @@ const Dropdown: React.FC<DropdownProps> = ({
   ...props
 }) => {
   const supabase = createClientComponentClient()
+  const { user } = useSupabaseUser()
   const { state, dispatch, workspaceId, folderId } = useAppState()
   const [isEditing, setIsEditing] = useState(false)
   const router = useRouter()
@@ -235,7 +237,67 @@ const Dropdown: React.FC<DropdownProps> = ({
   }
 
   //move to trash
+  //-----------------------MOVE TO TRASH--------------------------------------
+  const moveToTrash = async () => {
+    if (!user?.email || !workspaceId) return
+    const pathId = id.split('folder')
+    if (listType === 'folder') {
+      dispatch({
+        type: 'UPDATE_FOLDER',
+        payload: {
+          folder: { inTrash: `Deleted by ${user.email}` },
+          folderId: pathId[0],
+          workspaceId,
+        },
+      })
+      const { error } = await updateFolder(
+        { inTrash: `Deleted by ${user.email}` },
+        pathId[0]
+      )
+      if (error) {
+        toast({
+          title: 'Error',
+          variant: 'destructive',
+          description: 'Could not move the folder to Trash',
+        })
+      } else {
+        toast({
+          title: 'Success',
+          description: 'Folder moved to Trash',
+        })
+      }
+    }
 
+    if (listType === 'file') {
+      dispatch({
+        type: 'UPDATE_FILE',
+        payload: {
+          file: { inTrash: `Deleted by ${user?.email}` },
+          folderId: pathId[0],
+          workspaceId,
+          fileId: pathId[1],
+        },
+      })
+      const { error } = await updateFile(
+        { inTrash: `Deleted by ${user.email}` },
+        pathId[1]
+      )
+      if (error) {
+        toast({
+          title: 'Error',
+          variant: 'destructive',
+          description: 'Could not move the file to trash',
+        })
+      } else {
+        toast({
+          title: 'Success',
+          description: 'Moved file to trash',
+        })
+      }
+    }
+  }
+
+  //------------------------------STYLING---------------------------------------
   const isFolder = listType === 'folder'
   //----------------LIST STYLING---------------------------
   const listStyles = useMemo(
@@ -311,9 +373,11 @@ const Dropdown: React.FC<DropdownProps> = ({
             />
           </div>
           <div className={hoverStyles}>
-            <TooltipComponent message="Delete Folder">
+            <TooltipComponent
+              message={listType === 'folder' ? 'Delete Folder' : 'Delete File'}
+            >
               <Trash
-                // onClick={moveToTrash}
+                onClick={moveToTrash}
                 size={15}
                 className="hover:dark:text-white dark:text-Neutrals/neutrals-7 transition-colors"
               />
