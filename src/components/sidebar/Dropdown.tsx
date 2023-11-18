@@ -13,6 +13,7 @@ import TooltipComponent from '../global/TooltipComponent'
 import { PlusIcon, Trash } from 'lucide-react'
 import { v4 } from 'uuid'
 import { File } from '@/lib/supabase/supabase.types'
+import { AccordionContent } from '@radix-ui/react-accordion'
 
 interface DropdownProps {
   title: string
@@ -188,9 +189,18 @@ const Dropdown: React.FC<DropdownProps> = ({
   }
   //-------FILE-------
   const fileTitleChange = (e: any) => {
+    if (!workspaceId || !folderId) return
     const fId = id.split('folder')
     if (fId.length === 2 && fId[1]) {
-      // dispatch({})
+      dispatch({
+        type: 'UPDATE_FILE',
+        payload: {
+          file: { title: e.target.value },
+          folderId,
+          workspaceId,
+          fileId: fId[1],
+        },
+      })
     }
   }
 
@@ -290,6 +300,24 @@ const Dropdown: React.FC<DropdownProps> = ({
           </div>
         </div>
       </AccordionTrigger>
+      <AccordionContent>
+        {state.workspaces
+          .find((workspace) => workspace.id === workspaceId)
+          ?.folders.find((folder) => folder.id === id)
+          ?.files.filter((file) => !file.inTrash)
+          .map((file) => {
+            const customFileId = `${id}folder${file.id}`
+            return (
+              <Dropdown
+                key={file.id}
+                title={file.title}
+                listType="file"
+                id={customFileId}
+                iconId={file.iconId}
+              />
+            )
+          })}
+      </AccordionContent>
     </AccordionItem>
   )
 }
