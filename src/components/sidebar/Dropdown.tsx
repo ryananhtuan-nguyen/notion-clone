@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 import { AccordionItem, AccordionTrigger } from '../ui/accordion'
 import { cn } from '@/lib/utils'
 import EmojiPicker from '../global/EmojiPicker'
-import { createFile, updateFolder } from '@/lib/supabase/queries'
+import { createFile, updateFile, updateFolder } from '@/lib/supabase/queries'
 import { toast, useToast } from '../ui/use-toast'
 import TooltipComponent from '../global/TooltipComponent'
 import { PlusIcon, Trash } from 'lucide-react'
@@ -74,7 +74,7 @@ const Dropdown: React.FC<DropdownProps> = ({
     }
   }
   // Add a file
-  //-----------------ADD NEW FILE
+  //-----------------ADD NEW FILE---------------------------------
   const addNewFile = async () => {
     if (!workspaceId) return
 
@@ -124,16 +124,46 @@ const Dropdown: React.FC<DropdownProps> = ({
     const fId = id.split('folder')
     if (fId.length === 1) {
       if (!folderTitle) return
-      await updateFolder(
+      const { error } = await updateFolder(
         {
           title,
         },
         fId[0]
       )
+      if (error) {
+        toast({
+          title: 'Error',
+          variant: 'destructive',
+          description: 'Failed changing folder title',
+        })
+      } else {
+        toast({
+          title: 'Success',
+          description: 'Folder title changed.',
+        })
+      }
     }
     if (fId.length === 2 && fId[1]) {
       if (!fileTitle) return
-      //update the file
+      // update the file
+      const { error } = await updateFile(
+        {
+          title: fileTitle,
+        },
+        fId[1]
+      )
+      if (error) {
+        toast({
+          title: 'Error',
+          variant: 'destructive',
+          description: 'Failed changing file title',
+        })
+      } else {
+        toast({
+          title: 'Success',
+          description: 'File title changed.',
+        })
+      }
     }
   }
 
