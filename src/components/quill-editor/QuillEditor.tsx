@@ -452,6 +452,9 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
               </Button>
             )}
           </div>
+          <span className="text-muted-foreground text-3xl font-bold h-9">
+            {details.title}
+          </span>
         </div>
         <div id="container" ref={wrapperRef} className="max-w-[800px]"></div>
       </div>
