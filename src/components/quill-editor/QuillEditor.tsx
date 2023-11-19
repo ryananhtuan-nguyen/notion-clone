@@ -492,9 +492,30 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
               break
           }
         }
+        setSaving(false)
       }, 850)
+      socket.emit('send-changes', delta, fileId)
     }
-  }, [quill, socket, fileId, user, details])
+    quill.on('text-change', quillHandler)
+    //WIP CURSOR SELECTED HANDLER
+
+    //CLEANUP
+    return () => {
+      quill.off('text-change', quillHandler)
+      //WIP CURSOR
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
+    }
+  }, [
+    quill,
+    socket,
+    fileId,
+    user,
+    details,
+    folderId,
+    workspaceId,
+    dirType,
+    dispatch,
+  ])
 
   return (
     <>
