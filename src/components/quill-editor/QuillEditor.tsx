@@ -77,6 +77,7 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
   const router = useRouter()
   const { user } = useSupabaseUser()
   const saveTimerRef = useRef<ReturnType<typeof setTimeout>>()
+  const [localCursors, setLocalCursors] = useState<any[]>([])
 
   //--------------------DETAILS DISPLAYING------------------------
   const details = useMemo(() => {
@@ -538,6 +539,38 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
       socket.off('receive-changes', socketHandler)
     }
   }, [quill, socket, fileId])
+
+  //=============CURSORS================
+
+  useEffect(() => {
+    if (!fileId || quill === null) return
+    const room = supabase.channel(fileId)
+    const subscription = room.on('presence', { event: 'sync' }, () => {
+      const newState = room.presenceState()
+      const newCollaborators = Object.values(newState).flat() as any
+      setCollaborators(newCollaborators)
+      if (user) {
+        const allCursors: any = []
+        newCollaborators.forEach(
+          (collaborator: { id: string; email: string; avatar: string }) => {
+            if (collaborator.id !== user.id) {
+              const userCursor = quill.getModule('cursor')
+              userCursor.createCursor(
+                //id
+                collaborator.id,
+                //displayname
+                collaborator.email.split('@')[0],
+                //color
+                `#${Math.random().toString(16).slice(2, 8)}`
+              )
+              allCursors.push(userCursor)
+            }
+          }
+        )
+        setLocalCursors(allCursors)
+      }
+    })
+  }, [fileId, quill, supabase])
 
   return (
     <>
