@@ -172,6 +172,28 @@ const SettingForm = () => {
     if (showingWorkspace) setWorkspaceDetails(showingWorkspace)
   }, [workspaceId, state])
 
+  useEffect(() => {
+    if (!workspaceId) return
+    const fetchCollaborators = async () => {
+      const response = await getCollaborators(workspaceId)
+      if (response.length) {
+        setPermissions('shared')
+        setCollaborators(response)
+      }
+    }
+    fetchCollaborators()
+  }, [workspaceId])
+
+  const onClickAlertConfirm = async () => {
+    if (!workspaceId) return
+    if (collaborators.length > 0) {
+      await removeCollaborators(collaborators, workspaceId)
+    }
+
+    setPermissions('private')
+    setOpenAlertMessage(false)
+  }
+
   return (
     <div className="flex gap4 flex-col">
       <p className="flex items-center gap-2 mt-6">
@@ -354,7 +376,27 @@ const SettingForm = () => {
             Delete Workspace
           </Button>
         </Alert>
-        {/* <p className="flex items-center gap-2 mt-6">
+      </>
+      <AlertDialog open={openAlertMessage}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure</AlertDialogTitle>
+            <AlertDescription>
+              Changing a Shared workspace to a Private workspace will remove all
+              collaborators permanantly
+            </AlertDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setOpenAlertMessage(false)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={onClickAlertConfirm}
+            ></AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      {/* <p className="flex items-center gap-2 mt-6">
           <UserIcon size={20} /> Profile
         </p>
         <Separator />
@@ -431,7 +473,6 @@ const SettingForm = () => {
             </Button>
           </div>
         )} */}
-      </>
     </div>
   )
 }
