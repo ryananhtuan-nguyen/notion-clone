@@ -1,15 +1,9 @@
 import React from 'react'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import { zodResolver } from '@hookform/resolvers/zod'
 
-import { File, Folder, workspace } from '@/lib/supabase/supabase.types'
 import { UploadBannerFormSchema } from '@/lib/types'
-import {
-  appFoldersType,
-  appWorkspacesType,
-  useAppState,
-} from '@/lib/providers/state-provider'
+import { useAppState } from '@/lib/providers/state-provider'
 import { z } from 'zod'
 import { Label } from '../ui/label'
 import { Input } from '../ui/input'
@@ -24,14 +18,9 @@ import {
 interface BannerUploadFormProps {
   dirType: 'workspace' | 'folder' | 'file'
   id: string
-  details: appWorkspacesType | appFoldersType | File | workspace | Folder
 }
 
-const BannerUploadForm: React.FC<BannerUploadFormProps> = ({
-  details,
-  dirType,
-  id,
-}) => {
+const BannerUploadForm: React.FC<BannerUploadFormProps> = ({ dirType, id }) => {
   const supabase = createClientComponentClient()
   const { state, workspaceId, folderId, dispatch } = useAppState()
   const {
