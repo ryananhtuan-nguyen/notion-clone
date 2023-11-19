@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import 'quill/dist/quill.snow.css'
 import Image from 'next/image'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
@@ -32,6 +32,7 @@ import EmojiPicker from '../global/EmojiPicker'
 import BannerUpload from '../banner-upload/BannerUpload'
 import { XCircleIcon } from 'lucide-react'
 import { useSocket } from '@/lib/providers/socket-provider'
+import { useSupabaseUser } from '@/lib/providers/supabase-user-provider'
 
 interface QuillEditorProps {
   dirDetails: File | Folder | workspace
@@ -74,6 +75,8 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
   const [deletingBanner, setDeletingBanner] = useState(false)
   const { socket } = useSocket()
   const router = useRouter()
+  const { user } = useSupabaseUser()
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout>>()
 
   //--------------------DETAILS DISPLAYING------------------------
   const details = useMemo(() => {
@@ -422,7 +425,76 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
     fetchInformation()
   }, [fileId, workspaceId, folderId, quill, dirType, dispatch, router])
 
-  //==========CREATING ROOM
+  //==========CREATING ROOM====================
+  useEffect(() => {
+    if (socket === null || quill === null || !fileId) return
+
+    socket.emit('create-room', fileId)
+  }, [socket, quill, fileId])
+
+  //===============Send Quill changes to all clients==========
+  useEffect(() => {
+    if (quill === null || socket === null || !fileId || !user) return
+    // WIP CURSOR UPDATE
+    const selectionChangeHandler = () => {}
+    const quillHandler = (delta: any, oldDelta: any, source: any) => {
+      if (source !== 'user') return
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
+      setSaving(true)
+      const contents = quill.getContents()
+      const quillLength = quill.getLength()
+      saveTimerRef.current = setTimeout(async () => {
+        if (contents && quillLength !== 1 && fileId) {
+          switch (dirType) {
+            case 'workspace':
+              {
+                dispatch({
+                  type: 'UPDATE_WORKSPACE',
+                  payload: {
+                    workspace: { data: JSON.stringify(contents) },
+                    workspaceId: fileId,
+                  },
+                })
+                await updateWorkspace(
+                  { data: JSON.stringify(contents) },
+                  fileId
+                )
+              }
+              break
+            case 'folder':
+              {
+                if (!workspaceId) return
+                dispatch({
+                  type: 'UPDATE_FOLDER',
+                  payload: {
+                    folder: { data: JSON.stringify(contents) },
+                    folderId: fileId,
+                    workspaceId,
+                  },
+                })
+                await updateFolder({ data: JSON.stringify(contents) }, fileId)
+              }
+              break
+            case 'file':
+              {
+                if (!workspaceId || !folderId) return
+                dispatch({
+                  type: 'UPDATE_FILE',
+                  payload: {
+                    file: { data: JSON.stringify(contents) },
+                    workspaceId,
+                    folderId,
+                    fileId,
+                  },
+                })
+                await updateFile({ data: JSON.stringify(contents) }, fileId)
+              }
+              break
+          }
+        }
+      }, 850)
+    }
+  }, [quill, socket, fileId, user, details])
 
   return (
     <>
