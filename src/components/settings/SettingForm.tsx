@@ -64,7 +64,7 @@ const SettingForm = () => {
   const supabase = createClientComponentClient()
 
   const { state, workspaceId, dispatch } = useAppState()
-  const [permissions, setPermissions] = useState('Private')
+  const [permissions, setPermissions] = useState('private')
   const [collaborators, setCollaborators] = useState<User[] | []>([])
   const [openAlertMessage, setOpenAlertMessage] = useState(false)
   const [workspaceDetails, setWorkspaceDetails] = useState<workspace>()
@@ -157,9 +157,7 @@ const SettingForm = () => {
     } else setPermissions(val)
   }
 
-  //onClick alert
-
-  //fetching details (avatar, workspacedetails)
+  //fetching details
 
   //get all collaborators
 
@@ -184,6 +182,7 @@ const SettingForm = () => {
     fetchCollaborators()
   }, [workspaceId])
 
+  //===============ALERT ONCLICK CHANGING PERMISSION
   const onClickAlertConfirm = async () => {
     if (!workspaceId) return
     if (collaborators.length > 0) {
