@@ -9,10 +9,10 @@ import {
   users,
 } from '../../../migrations/schema'
 import { stripe } from './index'
-import { toDateTime } from '../utils'
 import { eq } from 'drizzle-orm'
+import { toDateTime } from '../utils'
 
-export const upserProductRecord = async (product: Stripe.Product) => {
+export const upsertProductRecord = async (product: Stripe.Product) => {
   const productData: Product = {
     id: product.id,
     active: product.active,
@@ -21,7 +21,6 @@ export const upserProductRecord = async (product: Stripe.Product) => {
     image: product.images?.[0] ?? null,
     metadata: product.metadata,
   }
-
   try {
     await db
       .insert(products)
@@ -30,10 +29,11 @@ export const upserProductRecord = async (product: Stripe.Product) => {
   } catch (error) {
     throw new Error()
   }
-  console.log('Product inserted/updated: ', product.id)
+  console.log('Product inserted/updates:', product.id)
 }
 
 export const upsertPriceRecord = async (price: Stripe.Price) => {
+  console.log(price, 'PRICE')
   const priceData: Price = {
     id: price.id,
     productId: typeof price.product === 'string' ? price.product : null,
@@ -84,10 +84,10 @@ export const createOrRetrieveCustomer = async ({
       await db
         .insert(customers)
         .values({ id: uuid, stripeCustomerId: customer.id })
-      console.log('New customer created and inserted for ', uuid)
+      console.log(`New customer created and inserted for ${uuid}.`)
       return customer.id
     } catch (stripeError) {
-      throw new Error('Could not create or find the customer')
+      throw new Error('Could not create Customer or find the customer')
     }
   }
 }
@@ -110,7 +110,7 @@ export const copyBillingDetailsToCustomer = async (
       })
       .where(eq(users.id, uuid))
   } catch (error) {
-    throw new Error('Could not copy customer billing details')
+    throw new Error('Couldnot copy customer billing details')
   }
 }
 
