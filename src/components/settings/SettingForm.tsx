@@ -56,12 +56,15 @@ import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import { Alert, AlertDescription } from '../ui/alert'
 import CypressProfileIcon from '../icons/cypressProfileIcon'
 import { postData } from '@/lib/utils'
+import LogoutButton from '../global/LogoutButton'
+import { useSubscriptionModal } from '@/lib/providers/SubscriptionModalProvider'
 
 const SettingForm = () => {
   const { toast } = useToast()
-  const { user } = useSupabaseUser()
+  const { user, subscription } = useSupabaseUser()
   const router = useRouter()
   const supabase = createClientComponentClient()
+  const { open, setOpen } = useSubscriptionModal()
 
   const { state, workspaceId, dispatch } = useAppState()
   const [permissions, setPermissions] = useState('private')
@@ -157,10 +160,9 @@ const SettingForm = () => {
 
   //fetching details
 
-  //get all collaborators
-
   //WIP PAYMENT PORTAL redirect
 
+  //get all collaborators
   useEffect(() => {
     const showingWorkspace = state.workspaces.find(
       (workspace) => workspace.id === workspaceId
@@ -223,9 +225,14 @@ const SettingForm = () => {
           accept="image/*"
           placeholder="Workspace Logo"
           onChange={onChangeWorkspaceLogo}
-          disabled={uploadingLogo}
+          disabled={uploadingLogo || subscription?.status !== 'active'}
         />
         {/* SUBSCRIPTION */}
+        {subscription?.status !== 'active' && (
+          <small className="text-muted-foreground">
+            To customize your workspace, you need to be on a Pro Plan
+          </small>
+        )}
       </div>
       <>
         <Label htmlFor="permissions">Permissions</Label>
@@ -373,6 +380,83 @@ const SettingForm = () => {
             Delete Workspace
           </Button>
         </Alert>
+        <p className="flex items-center gap-2 mt-6">
+          <UserIcon size={20} /> Profile
+        </p>
+        <Separator />
+        <div className="flex items-center">
+          <Avatar>
+            <AvatarImage src={''} />
+            <AvatarFallback>
+              <CypressProfileIcon />
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col ml-6">
+            <small className="text-muted-foreground cursor-not-allowed">
+              {user ? user.email : ''}
+            </small>
+            <Label
+              htmlFor="profilePicture"
+              className="text-sm text-muted-foreground"
+            >
+              Profile Picture
+            </Label>
+            <Input
+              name="profilePicture"
+              type="file"
+              accept="image/*"
+              placeholder="Profile Picture"
+              // onChange={onChangeProfilePicture}
+              disabled={uploadingProfilePic}
+            />
+          </div>
+        </div>
+        <LogoutButton>
+          <div className="flex items-center">
+            <LogOut />
+          </div>
+        </LogoutButton>
+        <p className="flex items-center gap-2 mt-6">
+          <CreditCard size={20} /> Billing & Plan
+        </p>
+        <Separator />
+        <p className="text-muted-foreground">
+          You are currently on a{' '}
+          {subscription?.status === 'active' ? 'Pro' : 'Free'} Plan
+        </p>
+        <Link
+          href="/"
+          target="_blank"
+          className="text-muted-foreground flex flex-row items-center gap-2"
+        >
+          View Plans <ExternalLink size={16} />
+        </Link>
+        {subscription?.status === 'active' ? (
+          <div>
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              // disabled={loadingPortal}
+              className="text-sm"
+              // onClick={redirectToCustomerPortal}
+            >
+              Manage Subscription
+            </Button>
+          </div>
+        ) : (
+          <div>
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              className="text-sm"
+              onClick={() => setOpen(true)}
+            >
+              Start Plan{' '}
+            </Button>
+          </div>
+        )}
       </>
       <AlertDialog open={openAlertMessage}>
         <AlertDialogContent>
