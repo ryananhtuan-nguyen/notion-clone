@@ -84,7 +84,6 @@ const SettingForm = () => {
     await addCollaborators([profile], workspaceId)
     setCollaborators([...collaborators, profile])
   }
-
   //remove collaborator
   const removeCollaborator = async (user: User) => {
     if (!workspaceId) return
