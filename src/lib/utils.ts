@@ -1,6 +1,7 @@
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import { Price } from './supabase/supabase.types'
+import { Metadata } from 'next'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -47,4 +48,42 @@ export const toDateTime = (secs: number) => {
   var t = new Date('1970-01-01T00:30:00Z')
   t.setSeconds(secs)
   return t
+}
+
+export function constructMetadata({
+  title = 'Cypress - Your workspace, perfected',
+  description = 'Create and collaborate in your workspace has never been easier',
+  image = '/appBanner.png',
+  icons = '/favicon.ico',
+  noIndex = false,
+}: {
+  title?: string
+  description?: string
+  image?: string
+  icons?: string
+  noIndex?: boolean
+} = {}): Metadata {
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: [
+        {
+          url: image,
+        },
+      ],
+    },
+    icons,
+    metadataBase: new URL(
+      'https://notion-clone-production-90f7.up.railway.app/'
+    ),
+    ...(noIndex && {
+      robots: {
+        index: false,
+        follow: false,
+      },
+    }),
+  }
 }
