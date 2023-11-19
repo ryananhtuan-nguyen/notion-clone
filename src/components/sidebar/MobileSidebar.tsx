@@ -34,6 +34,7 @@ const MobileSidebar: React.FC<MobileSidebarProps> = ({ children }) => {
             <li
               className="flex items-center flex-col justify-center"
               key={item.id}
+              onClick={() => setSelectedNav(item.id)}
             >
               <item.customIcon />
               <small
