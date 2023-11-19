@@ -265,7 +265,7 @@ export const getActiveProductsWithPrice = async () => {
     if (res.length) return { data: res, error: null }
     return { data: [], error: null }
   } catch (error) {
-    console.log(error)
+    console.log('[ERROR GET ACTIVE PRODUCTS WITH PRICE', error)
     return { data: [], error }
   }
 }
