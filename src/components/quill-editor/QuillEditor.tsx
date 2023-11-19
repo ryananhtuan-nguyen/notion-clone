@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import 'quill/dist/quill.snow.css'
 import Image from 'next/image'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
@@ -336,6 +336,16 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
 
     setDeletingBanner(false)
   }
+
+  useEffect(() => {
+    let selectedDir
+    switch (dirType) {
+      case 'file':
+        {
+        }
+        break
+    }
+  }, [])
 
   return (
     <>
