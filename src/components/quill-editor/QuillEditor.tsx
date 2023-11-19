@@ -1,16 +1,13 @@
 'use client'
-
+import { useAppState } from '@/lib/providers/state-provider'
+import { File, Folder, workspace } from '@/lib/supabase/supabase.types'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import 'quill/dist/quill.snow.css'
-import Image from 'next/image'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-
-import { File, Folder, workspace } from '@/lib/supabase/supabase.types'
-import { useAppState } from '@/lib/providers/state-provider'
 import { Button } from '../ui/button'
 import {
   deleteFile,
   deleteFolder,
+  findUser,
   getFileDetails,
   getFolderDetails,
   getWorkspaceDetails,
@@ -19,7 +16,6 @@ import {
   updateWorkspace,
 } from '@/lib/supabase/queries'
 import { usePathname, useRouter } from 'next/navigation'
-import { string } from 'zod'
 import {
   Tooltip,
   TooltipContent,
@@ -28,6 +24,8 @@ import {
 } from '../ui/tooltip'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import { Badge } from '../ui/badge'
+import Image from 'next/image'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import EmojiPicker from '../global/EmojiPicker'
 import BannerUpload from '../banner-upload/BannerUpload'
 import { XCircleIcon } from 'lucide-react'
@@ -39,7 +37,6 @@ interface QuillEditorProps {
   fileId: string
   dirType: 'workspace' | 'folder' | 'file'
 }
-
 var TOOLBAR_OPTIONS = [
   ['bold', 'italic', 'underline', 'strike'], // toggled buttons
   ['blockquote', 'code-block'],
@@ -67,44 +64,36 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
 }) => {
   const supabase = createClientComponentClient()
   const { state, workspaceId, folderId, dispatch } = useAppState()
-  const [quill, setQuill] = useState<any>(null)
-  const pathname = usePathname()
-  const [collaborators, setCollaborators] =
-    useState<{ id: string; email: string; avatarUrl: string }[]>()
-  const [saving, setSaving] = useState(false)
-  const [deletingBanner, setDeletingBanner] = useState(false)
-  const { socket, isConnected } = useSocket()
-  const router = useRouter()
-  const { user } = useSupabaseUser()
   const saveTimerRef = useRef<ReturnType<typeof setTimeout>>()
-  const [localCursors, setLocalCursors] = useState<any[]>([])
+  const { user } = useSupabaseUser()
+  const router = useRouter()
+  const { socket, isConnected } = useSocket()
+  const pathname = usePathname()
+  const [quill, setQuill] = useState<any>(null)
+  const [collaborators, setCollaborators] = useState<
+    { id: string; email: string; avatarUrl: string }[]
+  >([])
+  const [deletingBanner, setDeletingBanner] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [localCursors, setLocalCursors] = useState<any>([])
 
-  //--------------------DETAILS DISPLAYING------------------------
   const details = useMemo(() => {
     let selectedDir
-    switch (dirType) {
-      case 'file':
-        {
-          selectedDir = state.workspaces
-            .find((workspace) => workspace.id === workspaceId)
-            ?.folders.find((folder) => folder.id === folderId)
-            ?.files.find((file) => file.id === fileId)
-        }
-        break
-      case 'folder':
-        {
-          selectedDir = state.workspaces
-            .find((workspace) => workspace.id === workspaceId)
-            ?.folders.find((folder) => folder.id === fileId)
-        }
-        break
-      case 'workspace':
-        {
-          selectedDir = state.workspaces.find(
-            (workspace) => workspace.id === fileId
-          )
-        }
-        break
+    if (dirType === 'file') {
+      selectedDir = state.workspaces
+        .find((workspace) => workspace.id === workspaceId)
+        ?.folders.find((folder) => folder.id === folderId)
+        ?.files.find((file) => file.id === fileId)
+    }
+    if (dirType === 'folder') {
+      selectedDir = state.workspaces
+        .find((workspace) => workspace.id === workspaceId)
+        ?.folders.find((folder) => folder.id === fileId)
+    }
+    if (dirType === 'workspace') {
+      selectedDir = state.workspaces.find(
+        (workspace) => workspace.id === fileId
+      )
     }
 
     if (selectedDir) {
@@ -119,8 +108,47 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
       inTrash: dirDetails.inTrash,
       bannerUrl: dirDetails.bannerUrl,
     } as workspace | Folder | File
-  }, [state, workspaceId, folderId, dirDetails, dirType, fileId])
+  }, [state, workspaceId, folderId])
 
+  const breadCrumbs = useMemo(() => {
+    if (!pathname || !state.workspaces || !workspaceId) return
+    const segments = pathname
+      .split('/')
+      .filter((val) => val !== 'dashboard' && val)
+    const workspaceDetails = state.workspaces.find(
+      (workspace) => workspace.id === workspaceId
+    )
+    const workspaceBreadCrumb = workspaceDetails
+      ? `${workspaceDetails.iconId} ${workspaceDetails.title}`
+      : ''
+    if (segments.length === 1) {
+      return workspaceBreadCrumb
+    }
+
+    const folderSegment = segments[1]
+    const folderDetails = workspaceDetails?.folders.find(
+      (folder) => folder.id === folderSegment
+    )
+    const folderBreadCrumb = folderDetails
+      ? `/ ${folderDetails.iconId} ${folderDetails.title}`
+      : ''
+
+    if (segments.length === 2) {
+      return `${workspaceBreadCrumb} ${folderBreadCrumb}`
+    }
+
+    const fileSegment = segments[2]
+    const fileDetails = folderDetails?.files.find(
+      (file) => file.id === fileSegment
+    )
+    const fileBreadCrumb = fileDetails
+      ? `/ ${fileDetails.iconId} ${fileDetails.title}`
+      : ''
+
+    return `${workspaceBreadCrumb} ${folderBreadCrumb} ${fileBreadCrumb}`
+  }, [state, pathname, workspaceId])
+
+  //
   const wrapperRef = useCallback(async (wrapper: any) => {
     if (typeof window !== 'undefined') {
       if (wrapper === null) return
@@ -129,9 +157,7 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
       wrapper.append(editor)
       const Quill = (await import('quill')).default
       const QuillCursors = (await import('quill-cursors')).default
-      Quill.register('/modules/cursors', QuillCursors)
-
-      //Manually mounting component
+      Quill.register('modules/cursors', QuillCursors)
       const q = new Quill(editor, {
         theme: 'snow',
         modules: {
@@ -145,54 +171,6 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
     }
   }, [])
 
-  //-----------------------BREADCRUMBS TO SHOW LOCATION----------------------------
-
-  const breadCrumbs = useMemo(() => {
-    if (!pathname || !state.workspaces || !workspaceId) return
-    //get segments from path name
-    const segments = pathname
-      .split('/')
-      .filter((val) => val !== 'dashboard' && val)
-    const workspaceDetails = state.workspaces.find(
-      (workspace) => workspace.id === workspaceId
-    )
-
-    const workspaceBreadCrumb = workspaceDetails
-      ? `${workspaceDetails.iconId} ${workspaceDetails.title}`
-      : ''
-    //if segments.length =1 means we are in workspace, just return workspace details
-    if (segments.length === 1) {
-      return workspaceBreadCrumb
-    }
-    //else:
-    const folderSegment = segments[1]
-    const folderDetails = workspaceDetails?.folders.find(
-      (folder) => folder.id === folderSegment
-    )
-    const folderBreadCrumb = folderDetails
-      ? `/${folderDetails.iconId} ${folderDetails.title}`
-      : ''
-
-    //if segments.length == 2, means we are in folder, get workspace + folder
-    if (segments.length === 2) {
-      return `${workspaceBreadCrumb} ${folderBreadCrumb}`
-    }
-
-    //else, means we are in specific file
-    //get workspace, folder details and file details to return
-
-    const fileSegment = segments[2]
-    const fileDetails = folderDetails?.files.find(
-      (file) => file.id === fileSegment
-    )
-    const fileBreadCrumb = fileDetails
-      ? `/ ${fileDetails.iconId} ${fileDetails.title}`
-      : ''
-
-    return `${workspaceBreadCrumb} ${folderBreadCrumb} ${fileBreadCrumb}`
-  }, [state])
-
-  //--------------------------------RESTORING FILE IN TRASH--------------------------------
   const restoreFileHandler = async () => {
     if (dirType === 'file') {
       if (!folderId || !workspaceId) return
@@ -206,242 +184,204 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
       if (!workspaceId) return
       dispatch({
         type: 'UPDATE_FOLDER',
-        payload: {
-          folder: {
-            inTrash: '',
-          },
-          folderId: fileId,
-          workspaceId,
-        },
+        payload: { folder: { inTrash: '' }, folderId: fileId, workspaceId },
       })
       await updateFolder({ inTrash: '' }, fileId)
     }
   }
 
-  //---------------------------MOVE FILE TO TRASH-------------------------------
   const deleteFileHandler = async () => {
     if (dirType === 'file') {
-      if (!folderId || !workspaceId || !fileId) return
+      if (!folderId || !workspaceId) return
       dispatch({
         type: 'DELETE_FILE',
-        payload: { workspaceId, folderId, fileId },
+        payload: { fileId, folderId, workspaceId },
       })
       await deleteFile(fileId)
+      router.replace(`/dashboard/${workspaceId}`)
     }
     if (dirType === 'folder') {
-      if (!workspaceId || !folderId) return
+      if (!workspaceId) return
       dispatch({
         type: 'DELETE_FOLDER',
-        payload: {
-          folderId: fileId,
-          workspaceId,
-        },
+        payload: { folderId: fileId, workspaceId },
       })
       await deleteFolder(fileId)
-    }
-  }
-  //===================CHANGING ICON FROM WORKING TAB================
-  const iconOnChange = async (icon: string) => {
-    if (!fileId) return
-    switch (dirType) {
-      case 'workspace':
-        {
-          dispatch({
-            type: 'UPDATE_WORKSPACE',
-            payload: { workspace: { iconId: icon }, workspaceId: fileId },
-          })
-          await updateWorkspace({ iconId: icon }, fileId)
-        }
-        break
-      case 'folder':
-        {
-          if (!workspaceId) return
-          dispatch({
-            type: 'UPDATE_FOLDER',
-            payload: {
-              folder: { iconId: icon },
-              workspaceId,
-              folderId: fileId,
-            },
-          })
-          await updateFolder({ iconId: icon }, fileId)
-        }
-        break
-      case 'file':
-        {
-          if (!workspaceId || !folderId) return
-          dispatch({
-            type: 'UPDATE_FILE',
-            payload: {
-              file: { iconId: icon },
-              workspaceId,
-              folderId,
-              fileId,
-            },
-          })
-          await updateFile({ iconId: icon }, fileId)
-        }
-        break
+      router.replace(`/dashboard/${workspaceId}`)
     }
   }
 
-  //================DELETE BANNER==============
+  const iconOnChange = async (icon: string) => {
+    if (!fileId) return
+    if (dirType === 'workspace') {
+      dispatch({
+        type: 'UPDATE_WORKSPACE',
+        payload: { workspace: { iconId: icon }, workspaceId: fileId },
+      })
+      await updateWorkspace({ iconId: icon }, fileId)
+    }
+    if (dirType === 'folder') {
+      if (!workspaceId) return
+      dispatch({
+        type: 'UPDATE_FOLDER',
+        payload: {
+          folder: { iconId: icon },
+          workspaceId,
+          folderId: fileId,
+        },
+      })
+      await updateFolder({ iconId: icon }, fileId)
+    }
+    if (dirType === 'file') {
+      if (!workspaceId || !folderId) return
+
+      dispatch({
+        type: 'UPDATE_FILE',
+        payload: { file: { iconId: icon }, workspaceId, folderId, fileId },
+      })
+      await updateFile({ iconId: icon }, fileId)
+    }
+  }
+
   const deleteBanner = async () => {
     if (!fileId) return
     setDeletingBanner(true)
-
-    switch (dirType) {
-      case 'file':
-        {
-          if (!folderId || !workspaceId) return
-          dispatch({
-            type: 'UPDATE_FILE',
-            payload: {
-              file: { bannerUrl: '' },
-              fileId,
-              folderId,
-              workspaceId,
-            },
-          })
-          await supabase.storage
-            .from('file-banners')
-            .remove([`banner-${fileId}`])
-          await updateFile({ bannerUrl: '' }, fileId)
-        }
-        break
-      case 'folder':
-        {
-          if (!workspaceId) return
-          dispatch({
-            type: 'UPDATE_FOLDER',
-            payload: {
-              folder: { bannerUrl: '' },
-              folderId: fileId,
-              workspaceId,
-            },
-          })
-
-          await supabase.storage
-            .from('file-banners')
-            .remove([`banner-${fileId}`])
-          await updateFolder({ bannerUrl: '' }, fileId)
-        }
-        break
-      case 'workspace':
-        {
-          dispatch({
-            type: 'UPDATE_WORKSPACE',
-            payload: {
-              workspace: { bannerUrl: '' },
-              workspaceId: fileId,
-            },
-          })
-          await supabase.storage
-            .from('file-banners')
-            .remove([`banner-${fileId}`])
-          await updateWorkspace({ bannerUrl: '' }, fileId)
-          await updateWorkspace({ bannerUrl: '' }, fileId)
-        }
-        break
+    if (dirType === 'file') {
+      if (!folderId || !workspaceId) return
+      dispatch({
+        type: 'UPDATE_FILE',
+        payload: { file: { bannerUrl: '' }, fileId, folderId, workspaceId },
+      })
+      await supabase.storage.from('file-banners').remove([`banner-${fileId}`])
+      await updateFile({ bannerUrl: '' }, fileId)
     }
-
+    if (dirType === 'folder') {
+      if (!workspaceId) return
+      dispatch({
+        type: 'UPDATE_FOLDER',
+        payload: { folder: { bannerUrl: '' }, folderId: fileId, workspaceId },
+      })
+      await supabase.storage.from('file-banners').remove([`banner-${fileId}`])
+      await updateFolder({ bannerUrl: '' }, fileId)
+    }
+    if (dirType === 'workspace') {
+      dispatch({
+        type: 'UPDATE_WORKSPACE',
+        payload: {
+          workspace: { bannerUrl: '' },
+          workspaceId: fileId,
+        },
+      })
+      await supabase.storage.from('file-banners').remove([`banner-${fileId}`])
+      await updateWorkspace({ bannerUrl: '' }, fileId)
+    }
     setDeletingBanner(false)
   }
 
   useEffect(() => {
     if (!fileId) return
     let selectedDir
-    //fetch info
     const fetchInformation = async () => {
-      switch (dirType) {
-        case 'file':
-          {
-            const { data: selectedDir, error } = await getFileDetails(fileId)
-            if (error || !selectedDir) {
-              return router.replace('/dashboard')
-            }
-
-            if (!selectedDir[0]) {
-              if (!workspaceId) return
-              return router.replace(`/dashboard/${workspaceId}`)
-            }
-
-            if (!workspaceId || quill === null) return
-            if (!selectedDir[0].data) return
-
-            quill.setContents(JSON.parse(selectedDir[0].data || ''))
-            dispatch({
-              type: 'UPDATE_FILE',
-              payload: {
-                file: { data: selectedDir[0].data },
-                fileId,
-                folderId: selectedDir[0].folderId,
-                workspaceId,
-              },
-            })
-          }
-          break
-
-        case 'folder':
-          {
-            const { data: selectedDir, error } = await getFolderDetails(fileId)
-            if (error || !selectedDir) {
-              return router.replace('/dashboard')
-            }
-
-            if (!selectedDir[0]) {
-              return router.replace(`/dashboard/${workspaceId}`)
-            }
-
-            if (quill === null) return
-            if (!selectedDir[0].data) return
-            quill.setContents(JSON.parse(selectedDir[0].data || ''))
-
-            dispatch({
-              type: 'UPDATE_FOLDER',
-              payload: {
-                folder: { data: selectedDir[0].data },
-                folderId: fileId,
-                workspaceId: selectedDir[0].workspaceId,
-              },
-            })
-          }
-          break
-
-        case 'workspace': {
-          const { data: selectedDir, error } = await getWorkspaceDetails(fileId)
-          if (error || !selectedDir) {
-            return router.replace('/dashboard')
-          }
-          if (!selectedDir[0] || !selectedDir[0].data || quill === null) return
-          quill.setContents(JSON.parse(selectedDir[0].data || ''))
-          dispatch({
-            type: 'UPDATE_WORKSPACE',
-            payload: {
-              workspace: { data: selectedDir[0].data },
-              workspaceId: fileId,
-            },
-          })
+      if (dirType === 'file') {
+        const { data: selectedDir, error } = await getFileDetails(fileId)
+        if (error || !selectedDir) {
+          return router.replace('/dashboard')
         }
+
+        if (!selectedDir[0]) {
+          if (!workspaceId) return
+          return router.replace(`/dashboard/${workspaceId}`)
+        }
+        if (!workspaceId || quill === null) return
+        if (!selectedDir[0].data) return
+        quill.setContents(JSON.parse(selectedDir[0].data || ''))
+        dispatch({
+          type: 'UPDATE_FILE',
+          payload: {
+            file: { data: selectedDir[0].data },
+            fileId,
+            folderId: selectedDir[0].folderId,
+            workspaceId,
+          },
+        })
+      }
+      if (dirType === 'folder') {
+        const { data: selectedDir, error } = await getFolderDetails(fileId)
+        if (error || !selectedDir) {
+          return router.replace('/dashboard')
+        }
+
+        if (!selectedDir[0]) {
+          router.replace(`/dashboard/${workspaceId}`)
+        }
+        if (quill === null) return
+        if (!selectedDir[0].data) return
+        quill.setContents(JSON.parse(selectedDir[0].data || ''))
+        dispatch({
+          type: 'UPDATE_FOLDER',
+          payload: {
+            folderId: fileId,
+            folder: { data: selectedDir[0].data },
+            workspaceId: selectedDir[0].workspaceId,
+          },
+        })
+      }
+      if (dirType === 'workspace') {
+        const { data: selectedDir, error } = await getWorkspaceDetails(fileId)
+        if (error || !selectedDir) {
+          return router.replace('/dashboard')
+        }
+        if (!selectedDir[0] || quill === null) return
+        if (!selectedDir[0].data) return
+        quill.setContents(JSON.parse(selectedDir[0].data || ''))
+        dispatch({
+          type: 'UPDATE_WORKSPACE',
+          payload: {
+            workspace: { data: selectedDir[0].data },
+            workspaceId: fileId,
+          },
+        })
       }
     }
-
     fetchInformation()
   }, [fileId, workspaceId, quill, dirType])
 
-  //==========CREATING ROOM====================
+  useEffect(() => {
+    if (quill === null || socket === null || !fileId || !localCursors.length)
+      return
+    const socketHandler = (range: any, roomId: string, cursorId: string) => {
+      if (roomId === fileId) {
+        const cursorToMove = localCursors.find(
+          (c: any) => c.cursors()?.[0].id === cursorId
+        )
+        if (cursorToMove) {
+          cursorToMove.moveCursor(cursorId, range)
+        }
+      }
+    }
+    socket.on('receive-cursor-move', socketHandler)
+    return () => {
+      socket.off('receive-cursor-move', socketHandler)
+    }
+  }, [quill, socket, fileId, localCursors])
+
+  //rooms
   useEffect(() => {
     if (socket === null || quill === null || !fileId) return
-
     socket.emit('create-room', fileId)
   }, [socket, quill, fileId])
 
-  //===============Send Quill changes to all clients==========
-  //=================THIS SOCKET EMIT THE CHANGES===========
+  //Send quill changes to all clients
   useEffect(() => {
     if (quill === null || socket === null || !fileId || !user) return
-    // WIP CURSOR UPDATE
-    const selectionChangeHandler = () => {}
+
+    const selectionChangeHandler = (cursorId: string) => {
+      return (range: any, oldRange: any, source: any) => {
+        if (source === 'user' && cursorId) {
+          socket.emit('send-cursor-move', range, fileId, cursorId)
+        }
+      }
+    }
     const quillHandler = (delta: any, oldDelta: any, source: any) => {
       if (source !== 'user') return
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
@@ -450,80 +390,56 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
       const quillLength = quill.getLength()
       saveTimerRef.current = setTimeout(async () => {
         if (contents && quillLength !== 1 && fileId) {
-          switch (dirType) {
-            case 'workspace':
-              {
-                dispatch({
-                  type: 'UPDATE_WORKSPACE',
-                  payload: {
-                    workspace: { data: JSON.stringify(contents) },
-                    workspaceId: fileId,
-                  },
-                })
-                await updateWorkspace(
-                  { data: JSON.stringify(contents) },
-                  fileId
-                )
-              }
-              break
-            case 'folder':
-              {
-                if (!workspaceId) return
-                dispatch({
-                  type: 'UPDATE_FOLDER',
-                  payload: {
-                    folder: { data: JSON.stringify(contents) },
-                    folderId: fileId,
-                    workspaceId,
-                  },
-                })
-                await updateFolder({ data: JSON.stringify(contents) }, fileId)
-              }
-              break
-            case 'file':
-              {
-                if (!workspaceId || !folderId) return
-                dispatch({
-                  type: 'UPDATE_FILE',
-                  payload: {
-                    file: { data: JSON.stringify(contents) },
-                    workspaceId,
-                    folderId,
-                    fileId,
-                  },
-                })
-                await updateFile({ data: JSON.stringify(contents) }, fileId)
-              }
-              break
+          if (dirType == 'workspace') {
+            dispatch({
+              type: 'UPDATE_WORKSPACE',
+              payload: {
+                workspace: { data: JSON.stringify(contents) },
+                workspaceId: fileId,
+              },
+            })
+            await updateWorkspace({ data: JSON.stringify(contents) }, fileId)
+          }
+          if (dirType == 'folder') {
+            if (!workspaceId) return
+            dispatch({
+              type: 'UPDATE_FOLDER',
+              payload: {
+                folder: { data: JSON.stringify(contents) },
+                workspaceId,
+                folderId: fileId,
+              },
+            })
+            await updateFolder({ data: JSON.stringify(contents) }, fileId)
+          }
+          if (dirType == 'file') {
+            if (!workspaceId || !folderId) return
+            dispatch({
+              type: 'UPDATE_FILE',
+              payload: {
+                file: { data: JSON.stringify(contents) },
+                workspaceId,
+                folderId: folderId,
+                fileId,
+              },
+            })
+            await updateFile({ data: JSON.stringify(contents) }, fileId)
           }
         }
         setSaving(false)
       }, 850)
-
       socket.emit('send-changes', delta, fileId)
     }
     quill.on('text-change', quillHandler)
-    //WIP CURSOR SELECTED HANDLER
+    quill.on('selection-change', selectionChangeHandler(user.id))
 
-    //CLEANUP
     return () => {
       quill.off('text-change', quillHandler)
-      //WIP CURSOR
+      quill.off('selection-change', selectionChangeHandler)
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
     }
-  }, [
-    quill,
-    socket,
-    fileId,
-    user,
-    details,
-    folderId,
-    workspaceId,
-    dirType,
-    dispatch,
-  ])
+  }, [quill, socket, fileId, user, details, folderId, workspaceId, dispatch])
 
-  //===============SOCKET TO RECEIVE CHANGES===================
   useEffect(() => {
     if (quill === null || socket === null) return
     const socketHandler = (deltas: any, id: string) => {
@@ -532,68 +448,106 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
       }
     }
     socket.on('receive-changes', socketHandler)
-
-    //CLEANUP
-
     return () => {
       socket.off('receive-changes', socketHandler)
     }
   }, [quill, socket, fileId])
 
-  //=============CURSORS================
-
   useEffect(() => {
     if (!fileId || quill === null) return
     const room = supabase.channel(fileId)
-    const subscription = room.on('presence', { event: 'sync' }, () => {
-      const newState = room.presenceState()
-      const newCollaborators = Object.values(newState).flat() as any
-      setCollaborators(newCollaborators)
-      if (user) {
-        const allCursors: any = []
-        newCollaborators.forEach(
-          (collaborator: { id: string; email: string; avatar: string }) => {
-            if (collaborator.id !== user.id) {
-              const userCursor = quill.getModule('cursor')
-              userCursor.createCursor(
-                //id
-                collaborator.id,
-                //displayname
-                collaborator.email.split('@')[0],
-                //color
-                `#${Math.random().toString(16).slice(2, 8)}`
-              )
-              allCursors.push(userCursor)
+    const subscription = room
+      .on('presence', { event: 'sync' }, () => {
+        const newState = room.presenceState()
+        const newCollaborators = Object.values(newState).flat() as any
+        setCollaborators(newCollaborators)
+        if (user) {
+          const allCursors: any = []
+          newCollaborators.forEach(
+            (collaborator: { id: string; email: string; avatar: string }) => {
+              if (collaborator.id !== user.id) {
+                const userCursor = quill.getModule('cursors')
+                userCursor.createCursor(
+                  collaborator.id,
+                  collaborator.email.split('@')[0],
+                  `#${Math.random().toString(16).slice(2, 8)}`
+                )
+                allCursors.push(userCursor)
+              }
             }
-          }
-        )
-        setLocalCursors(allCursors)
-      }
-    })
-  }, [fileId, quill, supabase])
+          )
+          setLocalCursors(allCursors)
+        }
+      })
+      .subscribe(async (status) => {
+        if (status !== 'SUBSCRIBED' || !user) return
+        const response = await findUser(user.id)
+        if (!response) return
+
+        room.track({
+          id: user.id,
+          email: user.email?.split('@')[0],
+          avatarUrl: response.avatarUrl
+            ? supabase.storage.from('avatars').getPublicUrl(response.avatarUrl)
+                .data.publicUrl
+            : '',
+        })
+      })
+    return () => {
+      supabase.removeChannel(room)
+    }
+  }, [fileId, quill, supabase, user])
 
   return (
     <>
-      {isConnected ? 'Connected' : 'Disconnected'}
       <div className="relative">
         {details.inTrash && (
-          <article className="py-2 bg-[#EB5757] flex md:flex-row flex-col justify-center items-center gap-4 flex-wrap">
-            <div className="flex flex-col md:flex-row gap-2 justify-center items-center">
+          <article
+            className="py-2 
+          z-40 
+          bg-[#EB5757] 
+          flex  
+          md:flex-row 
+          flex-col 
+          justify-center 
+          items-center 
+          gap-4 
+          flex-wrap"
+          >
+            <div
+              className="flex 
+            flex-col 
+            md:flex-row 
+            gap-2 
+            justify-center 
+            items-center"
+            >
               <span className="text-white">
                 This {dirType} is in the trash.
               </span>
               <Button
                 size="sm"
                 variant="outline"
-                className="bg-transparent border-white text-white hover:bg-white hover:text-[#EB5757]"
+                className="bg-transparent
+                border-white
+                text-white
+                hover:bg-white
+                hover:text-[#EB5757]
+                "
                 onClick={restoreFileHandler}
               >
                 Restore
               </Button>
+
               <Button
                 size="sm"
                 variant="outline"
-                className="bg-transparent border-white text-white hover:bg-white hover:text-[#EB5757]"
+                className="bg-transparent
+                border-white
+                text-white
+                hover:bg-white
+                hover:text-[#EB5757]
+                "
                 onClick={deleteFileHandler}
               >
                 Delete
@@ -602,26 +556,49 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
             <span className="text-sm text-white">{details.inTrash}</span>
           </article>
         )}
-        <div className="flex flex-col-reverse sm:flex-row sm:justify-between justify-center sm:items-center sm:p-2 p-8">
+        <div
+          className="flex 
+        flex-col-reverse 
+        sm:flex-row 
+        sm:justify-between 
+        justify-center 
+        sm:items-center 
+        sm:p-2 
+        p-8"
+        >
           <div>{breadCrumbs}</div>
           <div className="flex items-center gap-4">
             <div className="flex items-center justify-center h-10">
-              {/* WIP mapping collaborator*/}
               {collaborators?.map((collaborator) => (
                 <TooltipProvider key={collaborator.id}>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Avatar className="-ml-3 bg-background border-2 flex items-center justify-center border-white h-8 w-8 rounded-full">
+                      <Avatar
+                        className="
+                    -ml-3 
+                    bg-background 
+                    border-2 
+                    flex 
+                    items-center 
+                    justify-center 
+                    border-white 
+                    h-8 
+                    w-8 
+                    rounded-full
+                    "
+                      >
                         <AvatarImage
+                          src={
+                            collaborator.avatarUrl ? collaborator.avatarUrl : ''
+                          }
                           className="rounded-full"
-                          src={collaborator.avatarUrl || ''}
                         />
                         <AvatarFallback>
                           {collaborator.email.substring(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                     </TooltipTrigger>
-                    <TooltipContent>User name</TooltipContent>
+                    <TooltipContent>{collaborator.email}</TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
               ))}
@@ -629,16 +606,25 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
             {saving ? (
               <Badge
                 variant="secondary"
-                className="bg-orange-600 top-4 text-white right-4 z-50"
+                className="bg-orange-600 top-4
+                text-white
+                right-4
+                z-50
+                "
               >
                 Saving...
               </Badge>
             ) : (
               <Badge
                 variant="secondary"
-                className="bg-emerald-600 top-4 text-white right-4 z-50"
+                className="bg-emerald-600 
+                top-4
+              text-white
+              right-4
+              z-50
+              "
               >
-                Saved.
+                Saved
               </Badge>
             )}
           </div>
@@ -653,26 +639,59 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
                 .getPublicUrl(details.bannerUrl).data.publicUrl
             }
             fill
-            className="w-full md:h-48 h-20 object-cover"
+            className="w-full md:h-48
+            h-20
+            object-cover"
             alt="Banner Image"
           />
         </div>
       )}
-      <div className="flex justify-center items-center flex-col mt-2 relative">
-        <div className="w-full self-center max-w-[800px] flex flex-col px-7 lg:my-8">
+      <div
+        className="flex 
+        justify-center
+        items-center
+        flex-col
+        mt-2
+        relative
+      "
+      >
+        <div
+          className="w-full 
+        self-center 
+        max-w-[800px] 
+        flex 
+        flex-col
+         px-7 
+         lg:my-8"
+        >
           <div className="text-[80px]">
             <EmojiPicker getValue={iconOnChange}>
-              <div className="w-[100px] cursor-pointer transition-colors h-[100px] flex items-center justify-center hover:bg-muted rounded-xl">
+              <div
+                className="w-[100px]
+                cursor-pointer
+                transition-colors
+                h-[100px]
+                flex
+                items-center
+                justify-center
+                hover:bg-muted
+                rounded-xl"
+              >
                 {details.iconId}
               </div>
             </EmojiPicker>
           </div>
-          <div className="flex">
+          <div className="flex ">
             <BannerUpload
-              details={details}
               id={fileId}
               dirType={dirType}
-              className="mt-2 text-sm text-muted-foreground p-2 hover:text-card-foreground transition-all rounded-md"
+              className="mt-2
+              text-sm
+              text-muted-foreground
+              p-2
+              hover:text-card-foreground
+              transition-all
+              rounded-md"
             >
               {details.bannerUrl ? 'Update Banner' : 'Add Banner'}
             </BannerUpload>
@@ -681,7 +700,16 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
                 disabled={deletingBanner}
                 onClick={deleteBanner}
                 variant="ghost"
-                className="gap-2 hover:bg-background flex items-center justify-center mt-2 text-sm text-muted-foreground w-36 p-2 rounded-md"
+                className="gap-2 hover:bg-background
+                flex
+                item-center
+                justify-center
+                mt-2
+                text-sm
+                text-muted-foreground
+                w-36
+                p-2
+                rounded-md"
               >
                 <XCircleIcon size={16} />
                 <span className="whitespace-nowrap font-normal">
@@ -690,14 +718,21 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
               </Button>
             )}
           </div>
-          <span className="text-muted-foreground text-3xl font-bold h-9">
+          <span
+            className="
+            text-muted-foreground
+            text-3xl
+            font-bold
+            h-9
+          "
+          >
             {details.title}
           </span>
           <span className="text-muted-foreground text-sm">
             {dirType.toUpperCase()}
           </span>
         </div>
-        <div id="container" ref={wrapperRef} className="max-w-[800px]"></div>
+        <div id="container" className="max-w-[800px]" ref={wrapperRef}></div>
       </div>
     </>
   )
