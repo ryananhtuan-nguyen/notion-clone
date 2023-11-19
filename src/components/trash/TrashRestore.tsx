@@ -14,7 +14,7 @@ const TrashRestore = () => {
   useEffect(() => {
     const stateFolders =
       state.workspaces
-        .find((work) => workspaceId === workspaceId)
+        .find((workspace) => workspace.id === workspaceId)
         ?.folders.filter((folder) => folder.inTrash) || []
     setFolders(stateFolders)
     let stateFiles: File[] = []
