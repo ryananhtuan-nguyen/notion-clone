@@ -12,6 +12,7 @@ import {
   deleteFile,
   deleteFolder,
   getFileDetails,
+  getFolderDetails,
   updateFile,
   updateFolder,
   updateWorkspace,
@@ -340,21 +341,50 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
   }
 
   useEffect(() => {
-    if(!fileId) return
+    if (!fileId) return
     let selectedDir
     //fetch info
-    const fetchInformation = async()=>{
+    const fetchInformation = async () => {
       switch (dirType) {
         case 'file':
           {
-            const {data :selectedDir, error} = await getFileDetails(fileId) 
-            if(error || )
+            const { data: selectedDir, error } = await getFileDetails(fileId)
+            if (error || !selectedDir) {
+              return router.replace('/dashboard')
+            }
+
+            if (!selectedDir[0]) {
+              if (!workspaceId) return
+              return router.replace(`/dashboard/${workspaceId}`)
+            }
+
+            if (!workspaceId || quill === null) return
+            if (!selectedDir[0].data) return
+
+            quill.setContents(JSON.parse(selectedDir[0].data || ''))
+            dispatch({
+              type: 'UPDATE_FILE',
+              payload: {
+                file: { data: selectedDir[0].data },
+                fileId,
+                folderId: selectedDir[0].folderId,
+                workspaceId,
+              },
+            })
+          }
+          break
+
+        case 'folder':
+          {
+            const { data: selectedDir, error } = await getFolderDetails(fileId)
+            if (error || !selectedDir) {
+              return router.replace('/dashboard')
+            }
           }
           break
       }
-
     }
-  }, [fileId])
+  }, [fileId, workspaceId, folderId])
 
   return (
     <>
