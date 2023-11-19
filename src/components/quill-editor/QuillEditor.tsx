@@ -28,6 +28,7 @@ import { Badge } from '../ui/badge'
 import EmojiPicker from '../global/EmojiPicker'
 import BannerUpload from '../banner-upload/BannerUpload'
 import { XCircleIcon } from 'lucide-react'
+import { useSocket } from '@/lib/providers/socket-provider'
 
 interface QuillEditorProps {
   dirDetails: File | Folder | workspace
@@ -68,6 +69,7 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
     useState<{ id: string; email: string; avatarUrl: string }[]>()
   const [saving, setSaving] = useState(false)
   const [deletingBanner, setDeletingBanner] = useState(false)
+  const { socket } = useSocket()
 
   //--------------------DETAILS DISPLAYING------------------------
   const details = useMemo(() => {
