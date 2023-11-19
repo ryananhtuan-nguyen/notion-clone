@@ -433,6 +433,7 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
   }, [socket, quill, fileId])
 
   //===============Send Quill changes to all clients==========
+  //=================THIS SOCKET EMIT THE CHANGES===========
   useEffect(() => {
     if (quill === null || socket === null || !fileId || !user) return
     // WIP CURSOR UPDATE
@@ -516,6 +517,23 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
     dirType,
     dispatch,
   ])
+
+  //===============SOCKET TO RECEIVE CHANGES===================
+  useEffect(() => {
+    if (quill === null || socket === null) return
+    const socketHandler = (deltas: any, id: string) => {
+      if (id === fileId) {
+        quill.updateContents(deltas)
+      }
+    }
+    socket.on('receive-changes', socketHandler)
+
+    //CLEANUP
+
+    return () => {
+      socket.off('receive-changes', socketHandler)
+    }
+  }, [quill, socket, fileId])
 
   return (
     <>
