@@ -15,7 +15,6 @@ import Loader from './Loader'
 import { Price, ProductWithPrice } from '@/lib/supabase/supabase.types'
 import { useToast } from '../ui/use-toast'
 import { getStripe } from '@/lib/stripe/stripeClient'
-// import { getStripe } from '@/lib/stripe/stripeClient'
 
 interface SubscriptionModalProps {
   products: ProductWithPrice[]
