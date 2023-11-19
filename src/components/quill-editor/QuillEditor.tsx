@@ -2,6 +2,8 @@
 
 import React, { useCallback, useMemo, useState } from 'react'
 import 'quill/dist/quill.snow.css'
+import Image from 'next/image'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 
 import { File, Folder, workspace } from '@/lib/supabase/supabase.types'
 import { useAppState } from '@/lib/providers/state-provider'
@@ -54,6 +56,7 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
   dirType,
   fileId,
 }) => {
+  const supabase = createClientComponentClient()
   const { state, workspaceId, folderId, dispatch } = useAppState()
   const [quill, setQuill] = useState<any>(null)
   const pathname = usePathname()
@@ -291,7 +294,24 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
           </div>
         </div>
       </div>
+      {details.bannerUrl && (
+        <div className="relative w-full h-[200px]">
+          <Image
+            src={
+              supabase.storage
+                .from('file-banners')
+                .getPublicUrl(details.bannerUrl).data.publicUrl
+            }
+            fill
+            className="w-full md:h-48 h-20 object-cover"
+            alt="Banner Image"
+          />
+        </div>
+      )}
       <div className="flex justify-center items-center flex-col mt-2 relative">
+        <div className="w-full self-center max-w-[800px] flex flex-col px-7 lg:my-8">
+          <div className="text-[80px]"></div>
+        </div>
         <div id="container" ref={wrapperRef} className="max-w-[800px]"></div>
       </div>
     </>
