@@ -13,6 +13,7 @@ import {
   deleteFolder,
   getFileDetails,
   getFolderDetails,
+  getWorkspaceDetails,
   updateFile,
   updateFolder,
   updateWorkspace,
@@ -380,11 +381,48 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
             if (error || !selectedDir) {
               return router.replace('/dashboard')
             }
+
+            if (!selectedDir[0]) {
+              return router.replace(`/dashboard/${workspaceId}`)
+            }
+
+            if (quill === null) return
+            if (!selectedDir[0].data) return
+            quill.setContents(JSON.parse(selectedDir[0].data || ''))
+
+            dispatch({
+              type: 'UPDATE_FOLDER',
+              payload: {
+                folder: { data: selectedDir[0].data },
+                folderId: fileId,
+                workspaceId: selectedDir[0].workspaceId,
+              },
+            })
           }
           break
+
+        case 'workspace': {
+          const { data: selectedDir, error } = await getWorkspaceDetails(fileId)
+          if (error || !selectedDir) {
+            return router.replace('/dashboard')
+          }
+          if (!selectedDir[0] || !selectedDir[0].data || quill === null) return
+          quill.setContents(JSON.parse(selectedDir[0].data || ''))
+          dispatch({
+            type: 'UPDATE_WORKSPACE',
+            payload: {
+              workspace: { data: selectedDir[0].data },
+              workspaceId: fileId,
+            },
+          })
+        }
       }
     }
-  }, [fileId, workspaceId, folderId])
+
+    fetchInformation()
+  }, [fileId, workspaceId, folderId, quill, dirType, dispatch, router])
+
+  //==========CREATING ROOM
 
   return (
     <>
