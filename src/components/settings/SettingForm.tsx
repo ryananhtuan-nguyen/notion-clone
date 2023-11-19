@@ -81,9 +81,8 @@ const SettingForm = () => {
     //setOpen(true)
     //return
     //}
-    await addCollaborators(collaborators, workspaceId)
+    await addCollaborators([profile], workspaceId)
     setCollaborators([...collaborators, profile])
-    router.refresh()
   }
 
   //remove collaborator
