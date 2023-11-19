@@ -11,11 +11,12 @@ import { Button } from '../ui/button'
 import {
   deleteFile,
   deleteFolder,
+  getFileDetails,
   updateFile,
   updateFolder,
   updateWorkspace,
 } from '@/lib/supabase/queries'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { string } from 'zod'
 import {
   Tooltip,
@@ -70,6 +71,7 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
   const [saving, setSaving] = useState(false)
   const [deletingBanner, setDeletingBanner] = useState(false)
   const { socket } = useSocket()
+  const router = useRouter()
 
   //--------------------DETAILS DISPLAYING------------------------
   const details = useMemo(() => {
@@ -338,14 +340,21 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
   }
 
   useEffect(() => {
+    if(!fileId) return
     let selectedDir
-    switch (dirType) {
-      case 'file':
-        {
-        }
-        break
+    //fetch info
+    const fetchInformation = async()=>{
+      switch (dirType) {
+        case 'file':
+          {
+            const {data :selectedDir, error} = await getFileDetails(fileId) 
+            if(error || )
+          }
+          break
+      }
+
     }
-  }, [])
+  }, [fileId])
 
   return (
     <>
