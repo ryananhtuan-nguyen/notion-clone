@@ -21,6 +21,7 @@ import {
   TooltipTrigger,
 } from '../ui/tooltip'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
+import { Badge } from '../ui/badge'
 
 interface QuillEditorProps {
   dirDetails: File | Folder | workspace
@@ -272,6 +273,21 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
                 </TooltipProvider>
               ))}
             </div>
+            {saving ? (
+              <Badge
+                variant="secondary"
+                className="bg-orange-600 top-4 text-white right-4 z-50"
+              >
+                Saving...
+              </Badge>
+            ) : (
+              <Badge
+                variant="secondary"
+                className="bg-emerald-600 top-4 text-white right-4 z-50"
+              >
+                Saved.
+              </Badge>
+            )}
           </div>
         </div>
       </div>
