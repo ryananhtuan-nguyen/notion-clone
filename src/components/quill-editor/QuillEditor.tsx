@@ -73,7 +73,7 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
     useState<{ id: string; email: string; avatarUrl: string }[]>()
   const [saving, setSaving] = useState(false)
   const [deletingBanner, setDeletingBanner] = useState(false)
-  const { socket } = useSocket()
+  const { socket, isConnected } = useSocket()
   const router = useRouter()
   const { user } = useSupabaseUser()
   const saveTimerRef = useRef<ReturnType<typeof setTimeout>>()
@@ -423,7 +423,7 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
     }
 
     fetchInformation()
-  }, [fileId, workspaceId, folderId, quill, dirType, dispatch, router])
+  }, [fileId, workspaceId, quill, dirType])
 
   //==========CREATING ROOM====================
   useEffect(() => {
@@ -495,6 +495,7 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
         }
         setSaving(false)
       }, 850)
+
       socket.emit('send-changes', delta, fileId)
     }
     quill.on('text-change', quillHandler)
@@ -537,6 +538,7 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
 
   return (
     <>
+      {isConnected ? 'Connected' : 'Disconnected'}
       <div className="relative">
         {details.inTrash && (
           <article className="py-2 bg-[#EB5757] flex md:flex-row flex-col justify-center items-center gap-4 flex-wrap">
