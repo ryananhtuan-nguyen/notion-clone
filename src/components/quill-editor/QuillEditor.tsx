@@ -127,14 +127,17 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
       const editor = document.createElement('div')
       wrapper.append(editor)
       const Quill = (await import('quill')).default
-      //WIP cursors
+      const QuillCursors = (await import('quill-cursors')).default
+      Quill.register('/modules/cursors', QuillCursors)
 
       //Manually mounting component
       const q = new Quill(editor, {
         theme: 'snow',
         modules: {
           toolbar: TOOLBAR_OPTIONS,
-          //WIP CURSOR
+          cursors: {
+            transformOnTextChange: true,
+          },
         },
       })
       setQuill(q)
