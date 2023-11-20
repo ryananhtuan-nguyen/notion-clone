@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/navigation-menu'
 import { cn } from '@/lib/utils'
 import { Button } from '../ui/button'
+import ModeToggle from '@/components/global/ModeToggle'
 
 const routes = [
   {
@@ -190,6 +191,7 @@ const Header = () => {
       LOGIN SIGN UP LINK
       */}
       <aside className="flex w-full gap-2 justify-end">
+        <ModeToggle />
         <Link href="/login">
           <Button variant="btn-secondary" className="p-1 hidden sm:block">
             Login
