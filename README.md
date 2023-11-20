@@ -1,6 +1,7 @@
 # Getting Started
 
 ### Features: 
+
   - Realtime cursors with socket.io deployed on railway.com
   - Realtime text-selection
   - Realtime database and collaboration
@@ -12,5 +13,12 @@
   - Custom email verifications.
   - Supabase Row level policies.
   - Custom Rich text editor
-  -
+  - Socket.io
+  - Responsive design
+
+  ### Tech-stack using in the project:
+
+
+  
+
 
