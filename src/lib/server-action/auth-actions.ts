@@ -14,6 +14,8 @@ export async function actionLoginUser({
     email,
     password,
   })
+  console.log('SUPABASE line 17 AuthAction', supabase)
+  console.log('cookies LINE 18 Auth Actions', cookies)
   return response
 }
 
