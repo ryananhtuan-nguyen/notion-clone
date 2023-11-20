@@ -12,7 +12,6 @@ const Layout: React.FC<LayoutProps> = async ({ children, params }) => {
   if (error) {
     redirect('/dashboard')
   }
-  console.log('DATA', products, 'ERROR', error)
 
   return (
     <main className="flex overflow-hidden h-screen">
