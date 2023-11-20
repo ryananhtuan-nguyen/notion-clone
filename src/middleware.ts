@@ -10,7 +10,9 @@ export async function middleware(req: NextRequest) {
   console.log(req.url, 'Req Url LINE 10 middleware')
   if (req.nextUrl.pathname.startsWith('/dashboard')) {
     if (!session) {
-      return NextResponse.redirect(new URL('/login', req.url))
+      return NextResponse.redirect(
+        new URL('/login', process.env.NEXT_PUBLIC_SITE_URL)
+      )
     }
   }
 
@@ -24,14 +26,16 @@ export async function middleware(req: NextRequest) {
         `/signup?error_description=${req.nextUrl.searchParams.get(
           'error_description'
         )}`,
-        req.url
+        process.env.NEXT_PUBLIC_SITE_URL
       )
     )
   }
 
   if (['/login', '/signup'].includes(req.nextUrl.pathname)) {
     if (session) {
-      return NextResponse.redirect(new URL('/dashboard', req.url))
+      return NextResponse.redirect(
+        new URL('/dashboard', process.env.NEXT_PUBLIC_SITE_URL)
+      )
     }
   }
   return res
