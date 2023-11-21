@@ -8,12 +8,18 @@ export async function middleware(req: NextRequest) {
     data: { session },
   } = await supabase.auth.getSession()
   console.log(req.url, 'Req Url LINE 10 middleware')
+
+  console.log('LINE 12 MIDDLEWARE< SESSION', session)
+
   if (req.nextUrl.pathname.startsWith('/dashboard')) {
     if (!session) {
       return NextResponse.redirect(new URL('/login', req.url))
     }
   }
 
+  console.log('[LINE 18 MIDDLEWARE, req.nextURL.pathname', req.nextUrl.pathname)
+
+  console.log('LINE 22 MIDDLEWARE, req.url', req.url)
   const emailLinkError = 'Email link is invalid or has expired'
   if (
     req.nextUrl.searchParams.get('error_description') === emailLinkError &&
@@ -31,11 +37,11 @@ export async function middleware(req: NextRequest) {
 
   if (['/login', '/signup'].includes(req.nextUrl.pathname)) {
     if (session) {
-      console.log('SESSION HERE LINE 34 middle ware' , session)
-      return NextResponse.redirect(
-        new URL('/dashboard', req.url)
-      )
+      console.log('SESSION HERE LINE 34 middle ware', session)
+      return NextResponse.redirect(new URL('/dashboard', req.url))
     }
   }
+
+  console.log('LINE45 middleware, res', res)
   return res
 }
