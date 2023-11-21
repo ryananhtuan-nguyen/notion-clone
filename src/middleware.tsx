@@ -43,6 +43,5 @@ export async function middleware(req: NextRequest) {
   }
 
   console.log('LINE45 middleware, res', res)
-  console.log('Line46 middleware, res.cookies', res.cookies.toString())
   return res
 }
