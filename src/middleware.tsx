@@ -43,5 +43,5 @@ export async function middleware(req: NextRequest) {
   }
 
   console.log('LINE45 middleware, res.header', res.headers.entries())
-  return res
+  return NextResponse.redirect(`${process.env.NEXT_PUBLIC_SITE_URL}/dashboard`)
 }
