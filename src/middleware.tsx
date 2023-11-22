@@ -42,6 +42,6 @@ export async function middleware(req: NextRequest) {
     }
   }
 
-  console.log('LINE45 middleware, res.header', await res.json())
+  console.log('LINE45 middleware, res.header', res)
   return res
 }
