@@ -14,7 +14,7 @@ const Layout: React.FC<LayoutProps> = async ({ children, params }) => {
   }
 
   return (
-    <main className="flex overflow-hidden h-screen">
+    <main className="flex  h-screen">
       <SubscriptionModalProvider products={products}>
         {children}
       </SubscriptionModalProvider>
