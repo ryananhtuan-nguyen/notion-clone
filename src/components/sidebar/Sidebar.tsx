@@ -54,7 +54,7 @@ const Sidebar: React.FC<SidebarProps> = async ({ params, className }) => {
   return (
     <aside
       className={twMerge(
-        'hidden sm:flex sm:flex-col w-[280px] shrink-0 p-4 md:gap-4 !justify-between sm:overflow-y-scroll',
+        'hidden sm:flex sm:flex-col w-[280px] shrink-0 p-4 md:gap-4 !justify-between',
         className
       )}
     >
