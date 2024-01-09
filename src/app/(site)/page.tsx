@@ -1,24 +1,24 @@
-import React from 'react'
-import Image from 'next/image'
-import { randomUUID } from 'crypto'
+import React from 'react';
+import Image from 'next/image';
+import { randomUUID } from 'crypto';
 
-import CustomCard from '@/components/CustomCard'
-import TitleSection from '@/components/landing-page/TitleSection'
-import Banner from '../../../public/appBanner.png'
-import Cal from '../../../public/cal.png'
-import Diamond from '../../../public/icons/diamond.svg'
-import CheckIcon from '../../../public/icons/check.svg'
+import CustomCard from '@/components/CustomCard';
+import TitleSection from '@/components/landing-page/TitleSection';
+import Banner from '../../../public/appBanner.png';
+import Cal from '../../../public/cal.png';
+import Diamond from '../../../public/icons/diamond.svg';
+import CheckIcon from '../../../public/icons/check.svg';
 
 import {
   Card,
   CardContent,
   CardDescription,
   CardTitle,
-} from '@/components/ui/card'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
-import { CLIENTS, PRICING_CARDS, PRICING_PLANS, USERS } from '@/lib/constants'
-import { cn } from '@/lib/utils'
+} from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { CLIENTS, PRICING_CARDS, PRICING_PLANS, USERS } from '@/lib/constants';
+import { cn } from '@/lib/utils';
 
 const Home = () => {
   return (
@@ -99,7 +99,7 @@ const Home = () => {
           <Image src={Cal} alt="Banner" className="rounded-2xl" />
         </div>
       </section>
-      <section className="relative">
+      <section className="relative" id="testimonial">
         <div className="w-full blur-[120px] rounded-full h-32 absolute bg-brand-primaryPurple/50 -z-10 top-[56px]" />
         <div className="mt-20 px-4 sm:px-6 flex flex-col overflow-x-hidden overflow-visible">
           <TitleSection
@@ -152,7 +152,7 @@ const Home = () => {
           ))}
         </div>
       </section>
-      <section className="mt-20 sm:px-6 px-4">
+      <section className="mt-20 sm:px-6 px-4" id="pricing">
         <TitleSection
           title="The Perfect Plan For You"
           subheading="Experience all the benefits of our platform. Select a plan that suits your needs and take your productivity to new heights."
@@ -223,7 +223,7 @@ const Home = () => {
         </div>
       </section>
     </>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;
