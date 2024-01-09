@@ -1,21 +1,22 @@
-'use client'
-import Image from 'next/image'
-import Link from 'next/link'
-import React, { useState } from 'react'
+'use client';
+import ModeToggle from '@/components/global/ModeToggle';
 import {
   NavigationMenu,
   NavigationMenuContent,
-  NavigationMenuIndicator,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
-  NavigationMenuViewport,
   navigationMenuTriggerStyle,
-} from '@/components/ui/navigation-menu'
-import { cn } from '@/lib/utils'
-import { Button } from '../ui/button'
-import ModeToggle from '@/components/global/ModeToggle'
+} from '@/components/ui/navigation-menu';
+import { cn } from '@/lib/utils';
+import Image from 'next/image';
+import Link from 'next/link';
+import React, { useState } from 'react';
+import { Button } from '../ui/button';
+import LogoutButton from '../global/LogoutButton';
+import { LogOut } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 const routes = [
   {
@@ -34,7 +35,7 @@ const routes = [
     title: 'Testimonials',
     href: '#testimonial',
   },
-]
+];
 
 const components: { title: string; href: string; description: string }[] = [
   {
@@ -72,10 +73,15 @@ const components: { title: string; href: string; description: string }[] = [
     description:
       'A popup that displays information related to an element when the element receives keyboard focus or the mouse hovers over it.',
   },
-]
+];
 
-const Header = () => {
-  const [path, setPath] = useState('#products')
+interface HeaderProps {
+  isLoggedIn: boolean;
+}
+
+const Header = ({ isLoggedIn }: HeaderProps) => {
+  const [path, setPath] = useState('#products');
+  const router = useRouter();
   return (
     <header className="p-4 flex justify-center items-center">
       {/* Logo  (Home Page Link) */}
@@ -142,10 +148,10 @@ const Header = () => {
             </NavigationMenuTrigger>
             <NavigationMenuContent>
               <ul className="grid w-[400px] gap-3 p-4 md:grid-rows-2">
-                <ListItem title="Pro Plan" href="#">
+                <ListItem title="Pro Plan" href="#pricing">
                   Unlock full power with collaboration.
                 </ListItem>
-                <ListItem title="Free Plan" href="#">
+                <ListItem title="Free Plan" href="#pricing">
                   Great for teams just starting out
                 </ListItem>
               </ul>
@@ -175,11 +181,13 @@ const Header = () => {
           */}
           <NavigationMenuItem>
             <NavigationMenuLink
+              onClick={() => router.push('#testimonial')}
               className={cn(navigationMenuTriggerStyle(), {
                 'dark:text-white': path === '#testimonials',
                 'dark:text-white/40': path !== '#testimonials',
                 'font-normal': true,
                 'text-xl': true,
+                'cursor-pointer': true,
               })}
             >
               Testimonial
@@ -190,24 +198,39 @@ const Header = () => {
       {/* 
       LOGIN SIGN UP LINK
       */}
-      <aside className="flex w-full gap-2 justify-end">
+      <aside className="flex w-full gap-4 justify-end">
+        {!isLoggedIn ? (
+          <>
+            <Link href="/login">
+              <Button variant="btn-secondary" className="p-1 hidden sm:block">
+                Login
+              </Button>
+            </Link>
+            <Link href="/signup">
+              <Button variant="btn-primary" className="whitespace-nowrap">
+                Sign Up
+              </Button>
+            </Link>
+          </>
+        ) : (
+          <>
+            <Link href="/dashboard">
+              <Button variant="btn-secondary" className="p-1 pr-8 sm:block">
+                Dashboard
+              </Button>
+            </Link>
+            <LogoutButton>
+              <LogOut />
+            </LogoutButton>
+          </>
+        )}
         <ModeToggle />
-        <Link href="/login">
-          <Button variant="btn-secondary" className="p-1 hidden sm:block">
-            Login
-          </Button>
-        </Link>
-        <Link href="/signup">
-          <Button variant="btn-primary" className="whitespace-nowrap">
-            Sign Up
-          </Button>
-        </Link>
       </aside>
     </header>
-  )
-}
+  );
+};
 
-export default Header
+export default Header;
 
 const ListItem = React.forwardRef<
   React.ElementRef<'a'>,
@@ -232,7 +255,7 @@ const ListItem = React.forwardRef<
         </a>
       </NavigationMenuLink>
     </li>
-  )
-})
+  );
+});
 
-ListItem.displayName = 'ListItem'
+ListItem.displayName = 'ListItem';
