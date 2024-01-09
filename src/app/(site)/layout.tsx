@@ -1,13 +1,24 @@
-import Header from '@/components/landing-page/Header'
-import React from 'react'
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
+import React from 'react';
 
-const HomePageLayout = ({ children }: { children: React.ReactNode }) => {
+import Header from '@/components/landing-page/Header';
+
+const HomePageLayout = async ({ children }: { children: React.ReactNode }) => {
+  const supabase = createServerComponentClient({ cookies });
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const isLoggedIn = !!user;
+
   return (
     <main>
-      <Header />
+      <Header isLoggedIn={isLoggedIn} />
       {children}
     </main>
-  )
-}
+  );
+};
 
-export default HomePageLayout
+export default HomePageLayout;
