@@ -4,7 +4,7 @@ import { randomUUID } from 'crypto';
 
 import CustomCard from '@/components/CustomCard';
 import TitleSection from '@/components/landing-page/TitleSection';
-import Banner from '../../../public/appBanner.png';
+import Banner from '../../../public/newBanner.png';
 import Cal from '../../../public/cal.png';
 import Diamond from '../../../public/icons/diamond.svg';
 import CheckIcon from '../../../public/icons/check.svg';
@@ -37,7 +37,11 @@ const Home = () => {
           </Button>
         </div>
         <div className="md:mt-[-90px] sm:w-full w-[750px] flex justify-center items-center mt-[-40px] relative sm:ml-0 ml-[-50px]">
-          <Image src={Banner} alt="Application Banner" />
+          <Image
+            src={Banner}
+            alt="Application Banner"
+            className="w-[70%] h-[70%]"
+          />
           <div className="bottom-0 top-[50%] bg-gradient-to-t dark:from-background left-0 right-0 absolute z-10"></div>
         </div>
       </section>
@@ -108,7 +112,7 @@ const Home = () => {
             personal and professional productivity needs."
             pill="Testimonials"
           />
-          {[...Array(2)].map((arr, index) => (
+          {[...Array(1)].map((_, index) => (
             <div
               key={randomUUID()}
               className={cn(
