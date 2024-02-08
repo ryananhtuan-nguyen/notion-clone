@@ -35,12 +35,11 @@
     - Supabase, postgres database, realtime database changes.
 
   ### Deployment:
-  - Vercel (socket.io is not compatible with vercel. Will implement Pusher for  realtime with Vercel soon)
+  - Vercel (without realtime collab features) : 
      [https://note-app-pi-nine.vercel.app/](https://note-app-pi-nine.vercel.app/)
 
-  - Railway (currently experiencing problem on connection between supabase and  railway. Local host working just fine)
-
-    [https://notion-clone-production-90f7.up.railway.app/](https://notion-clone-production-90f7.up.railway.app/)
+- Railway (fully functional app): 
+    [https://cypress-collaboration.up.railway.app/](https://cypress-collaboration.up.railway.app/)
 
 
 
