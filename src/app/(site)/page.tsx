@@ -1,24 +1,24 @@
-import React from 'react';
-import Image from 'next/image';
-import { randomUUID } from 'crypto';
+import React from 'react'
+import Image from 'next/image'
+import { randomUUID } from 'crypto'
 
-import CustomCard from '@/components/CustomCard';
-import TitleSection from '@/components/landing-page/TitleSection';
-import Banner from '../../../public/newBanner.png';
-import Cal from '../../../public/cal.png';
-import Diamond from '../../../public/icons/diamond.svg';
-import CheckIcon from '../../../public/icons/check.svg';
+import CustomCard from '@/components/CustomCard'
+import TitleSection from '@/components/landing-page/TitleSection'
+import Banner from '../../../public/newBanner.png'
+import Cal from '../../../public/cal.png'
+import Diamond from '../../../public/icons/diamond.svg'
+import CheckIcon from '../../../public/icons/check.svg'
 
 import {
   Card,
   CardContent,
   CardDescription,
   CardTitle,
-} from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { CLIENTS, PRICING_CARDS, PRICING_PLANS, USERS } from '@/lib/constants';
-import { cn } from '@/lib/utils';
+} from '@/components/ui/card'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
+import { CLIENTS, PRICING_CARDS, PRICING_PLANS, USERS } from '@/lib/constants'
+import { cn } from '@/lib/utils'
 
 const Home = () => {
   return (
@@ -73,8 +73,8 @@ const Home = () => {
           before:z-10
           before:absolute'
         >
-          {[...Array(2)].map(() => (
-            <div key="sss" className="flex flex-nowrap animate-slide">
+          {[...Array(2)].map((_, idx) => (
+            <div key={`Item ${idx}`} className="flex flex-nowrap animate-slide">
               {CLIENTS.map((client) => (
                 <div
                   key={client.alt}
@@ -227,7 +227,7 @@ const Home = () => {
         </div>
       </section>
     </>
-  );
-};
+  )
+}
 
-export default Home;
+export default Home
