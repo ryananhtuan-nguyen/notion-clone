@@ -149,25 +149,31 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
   }, [state, pathname, workspaceId])
 
   //
-  const wrapperRef = useCallback(async (wrapper: any) => {
+  const wrapperRef = useCallback((wrapper: any) => {
     if (typeof window !== 'undefined') {
       if (wrapper === null) return
       wrapper.innerHTML = ''
       const editor = document.createElement('div')
       wrapper.append(editor)
-      const Quill = (await import('quill')).default
-      const QuillCursors = (await import('quill-cursors')).default
-      Quill.register('modules/cursors', QuillCursors)
-      const q = new Quill(editor, {
-        theme: 'snow',
-        modules: {
-          toolbar: TOOLBAR_OPTIONS,
-          cursors: {
-            transformOnTextChange: true,
-          },
-        },
+
+      // Load Quill and QuillCursors asynchronously without making the wrapperRef function async
+      import('quill').then((QuillModule) => {
+        import('quill-cursors').then((QuillCursorsModule) => {
+          const Quill = QuillModule.default
+          const QuillCursors = QuillCursorsModule.default
+          Quill.register('modules/cursors', QuillCursors)
+          const q = new Quill(editor, {
+            theme: 'snow',
+            modules: {
+              toolbar: TOOLBAR_OPTIONS,
+              cursors: {
+                transformOnTextChange: true,
+              },
+            },
+          })
+          setQuill(q)
+        })
       })
-      setQuill(q)
     }
   }, [])
 
